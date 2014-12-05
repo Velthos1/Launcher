@@ -25,6 +25,7 @@ public class Download
 				ReadableByteChannel rbc = Channels.newChannel(website
 						.openStream());
 				FileOutputStream fos = new FileOutputStream(downloadFolder+"etarondownload.zip");
+			
 				fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 				System.out.println("Download Complete!");
 				Unzip.unpackGame(downloadFolder+"etarondownload.zip");

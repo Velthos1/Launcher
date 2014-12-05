@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
@@ -102,16 +103,16 @@ public class XML {
 						imageURL = nc.getTextContent().trim();
 					}
 				}
-				Image image = null;
-				try {
-					URL url = new URL(imageURL);
-					System.out.println();
-					image = Toolkit.getDefaultToolkit().createImage(url);
-				} catch (MalformedURLException e) {
+				
+				try
+				{
+					Window.games.add(new Game(gameName, "", "", new ImageIcon(new URL(imageURL))));
+				}
+				catch(MalformedURLException e)
+				{
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
-				Window.games.add(new Game(gameName, "", "", image));
 			}
 		}
 	}

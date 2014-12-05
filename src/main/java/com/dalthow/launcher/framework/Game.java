@@ -3,16 +3,17 @@ package com.dalthow.launcher.framework;
 import java.awt.Graphics;
 import java.awt.Image;
 
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 public class Game extends JPanel {
 	private String name;
 	private String version;
-	private Image image;
+	private ImageIcon image;
 
 	private String downloadLink;
 
-	public Game(String name, String version, String downloadLink, Image image) {
+	public Game(String name, String version, String downloadLink, ImageIcon image) {
 		this.name = name;
 		this.version = version;
 		this.downloadLink = downloadLink;
@@ -43,22 +44,11 @@ public class Game extends JPanel {
 		this.downloadLink = downloadLink;
 	}
 
-	public Image getImage() {
+	public ImageIcon getImage() {
 		return image;
 	}
 
-	public void setImage(Image image) {
+	public void setImage(ImageIcon image) {
 		this.image = image;
-	}
-
-	@Override
-	protected void paintComponent(Graphics g) {
-		super.paintComponent(g);
-
-		if(image!=null)
-		{
-			g.drawImage(image, this.getX(), this.getY(), this);
-			g.drawString(this.name, 4, image.getHeight(this) + 5);
-		}
 	}
 }
