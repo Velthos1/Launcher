@@ -12,10 +12,11 @@ public class Game extends JPanel {
 
 	private String downloadLink;
 
-	public Game(String name, String version, String downloadLink) {
+	public Game(String name, String version, String downloadLink, Image image) {
 		this.name = name;
 		this.version = version;
 		this.downloadLink = downloadLink;
+		this.image = image;
 	}
 
 	public String getVersion() {
@@ -56,7 +57,8 @@ public class Game extends JPanel {
 
 		if(image!=null)
 		{
-			g.drawImage(image, 0, 0, this);
+			g.drawImage(image, this.getX(), this.getY(), this);
+			g.drawString(this.name, image.getWidth(this) + 5, image.getHeight(this) + 5);
 		}
 	}
 }
