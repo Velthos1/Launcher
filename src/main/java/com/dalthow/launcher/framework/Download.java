@@ -12,20 +12,22 @@ public class Download
 {
 	public static Thread download;
 	
-	public static void downloadGame(final String url, final String outputFilename) throws MalformedURLException {
+	public static void downloadGame(final String url) throws MalformedURLException {
 	download = new Thread() {
 		public void run() {
+			File downloadFolder = new File(System.getProperty("java.io.tmpdir")+"/etaron/");
 			try {
-				if(!new File("downloads/").exists()){
-					new File("downloads/").mkdir();
+				if(!downloadFolder.exists()){
+					downloadFolder.mkdir();
 				}
 				URL website = new URL(
 						url);
 				ReadableByteChannel rbc = Channels.newChannel(website
 						.openStream());
-				FileOutputStream fos = new FileOutputStream("downloads/"+outputFilename);
+				FileOutputStream fos = new FileOutputStream(downloadFolder+"etarondownload.zip");
 				fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 				System.out.println("Download Complete!");
+				Unzip.unpackGame(downloadFolder+"etarondownload.zip");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -33,4 +35,8 @@ public class Download
 	};
 	download.run();
 }
+	
+	public static URL getLatestURL(){
+		return null;
+	}
 }
