@@ -106,7 +106,7 @@ public class XML {
 				
 				try
 				{
-					Window.games.add(new Game(gameName, "", "", new ImageIcon(new URL(imageURL))));
+					Window.games.add(new Game(gameName, mainClass, "", "", new ImageIcon(new URL(imageURL))));
 				}
 				catch(MalformedURLException e)
 				{

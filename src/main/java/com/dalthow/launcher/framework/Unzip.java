@@ -53,6 +53,7 @@ public class Unzip {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+				System.out.println("Unzip Complete!");
 			}
 		};
 		unzip.run();

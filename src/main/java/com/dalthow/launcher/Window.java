@@ -12,10 +12,15 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -39,8 +44,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.dalthow.launcher.framework.Download;
+import com.dalthow.launcher.framework.Encrypter;
 import com.dalthow.launcher.framework.Game;
 import com.dalthow.launcher.framework.JTextAreaOutputStream;
+import com.dalthow.launcher.framework.Unzip;
 import com.dalthow.launcher.framework.XML;
 
 @Component
@@ -54,7 +62,6 @@ public class Window extends JFrame
 
 	String[] nameList;
 
-	
 	private void addGamesToList()
 	{
 		for(int i = 0; i < games.size(); i++)
@@ -63,6 +70,14 @@ public class Window extends JFrame
 		}
 	}
 	
+	private boolean isGameInstalled(){
+		File file = new File(System.getenv("AppData")+"/Dalthow/"+games.get(gameList.getSelectedIndex()).getName()+"/");
+		if(file.exists()){
+			return true;
+		}
+		return false;
+	}
+
 	private void initComponents()
 	{
 		progress = new JProgressBar();
@@ -86,7 +101,22 @@ public class Window extends JFrame
 		playButton = new JButton();
 		versionLabel = new JLabel();
 
-		//	System.setOut(new JTextArea());
+		gameList.setSelectedIndex(0);
+		
+		MouseAdapter mouseListener = new MouseAdapter() {
+		      public void mouseClicked(MouseEvent mouseEvent) {
+		        JList theList = (JList) mouseEvent.getSource();
+		        if(isGameInstalled()){
+		        	playButton.setText("Play");
+		        }else{
+		        	playButton.setText("Download");
+		        }
+		      }
+		    };
+		    
+		    gameList.addMouseListener(mouseListener);
+		
+		System.setOut(new PrintStream(new JTextAreaOutputStream(consoleTextArea)));
 
 		{
 			this.setMinimumSize(new Dimension(690, 485));
@@ -98,41 +128,49 @@ public class Window extends JFrame
 			{
 
 				{
-					
+
 					gamesPanel.setLayout(new BorderLayout());
 					{
 						GameListRenderer renderer = new GameListRenderer();
 						renderer.setPreferredSize(new Dimension(100, 50));
-						
+
 						gameList.setPreferredSize(new Dimension(200, 0));
 						gameList.setCellRenderer(renderer);
 						gameScrollPane.setViewportView(gameList);
+						gameScrollPane.setWheelScrollingEnabled(true);
+
 					}
 					gamesPanel.add(gameScrollPane, BorderLayout.WEST);
 				}
-				
-				//======== gameControlWrapper ========
+
+				// ======== gameControlWrapper ========
 				{
 					gameControlWrapper.setLayout(new BorderLayout());
 
-					//======== gameControl ========
+					// ======== gameControl ========
 					{
 						gameControl.setPreferredSize(new Dimension(0, 75));
 						gameControl.setLayout(null);
 
-						//---- playButton ----
+						// ---- playButton ----
+						if(isGameInstalled()){
 						playButton.setText("Play");
+						
+						}else{
+							playButton.setText("Download");
+						}
 						gameControl.add(playButton);
 						playButton.setBounds(10, 10, 120, 45);
 
-						//---- versionLabel ----
+						// ---- versionLabel ----
 						versionLabel.setText("Version");
 						gameControl.add(versionLabel);
 						versionLabel.setBounds(140, 35, 365, versionLabel.getPreferredSize().height);
 
 						{ // compute preferred size
 							Dimension preferredSize = new Dimension();
-							for(int i = 0; i < gameControl.getComponentCount(); i++) {
+							for(int i = 0; i < gameControl.getComponentCount(); i++)
+							{
 								Rectangle bounds = gameControl.getComponent(i).getBounds();
 								preferredSize.width = Math.max(bounds.x + bounds.width, preferredSize.width);
 								preferredSize.height = Math.max(bounds.y + bounds.height, preferredSize.height);
@@ -147,7 +185,7 @@ public class Window extends JFrame
 					gameControlWrapper.add(gameControl, BorderLayout.SOUTH);
 				}
 				gamesPanel.add(gameControlWrapper, BorderLayout.CENTER);
-				
+
 				tabbedPane.addTab("Games", gamesPanel);
 
 				{
@@ -204,18 +242,53 @@ public class Window extends JFrame
 				tabbedPane.addTab("Console", consolePanel);
 			}
 			LauncherContentPane.add(tabbedPane, BorderLayout.CENTER);
-			System.setOut(new JTextAreaOutputStream(consoleTextArea));
+
 			this.playButton.addActionListener(new ActionListener()
 			{
 
-			@Override
-			public void actionPerformed(ActionEvent paramActionEvent)
-			{
-				Window.launchGame("Etaron", "com.dalthow.etaron.Launcher", "MattsMc", "test");
-			}
-				
+				@Override
+				public void actionPerformed(ActionEvent paramActionEvent)
+				{
+					try
+					{
+
+						for(int i = 0; i < games.size(); i++)
+						{
+							if(gameList.getSelectedValue().equals(games.get(i).getName()))
+							{
+								String output = games.get(i).getName().substring(0, 1).toUpperCase() + games.get(i).getName().substring(1);
+								
+								if(isGameInstalled())
+								{
+									launchGame(output, games.get(i).getMainClass(), "MattsMc", "test");
+								}
+								
+								else
+								{
+									 Download.downloadGame(XML.getUpdates().get(i).getUpdateLink());
+									 Unzip.unzip.join();
+									 
+									 playButton.setText("Play");
+								}
+							} 
+						}
+
+						
+					}
+					catch(IOException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					catch(InterruptedException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+
 			});
-			
+
 			this.pack();
 			this.setLocationRelativeTo(this.getOwner());
 		}
@@ -274,12 +347,15 @@ public class Window extends JFrame
 		return map;
 	}
 
-	// JFormDesigner - End of variables declaration  //GEN-END:variables
+	    
+	    
+	
+	// JFormDesigner - End of variables declaration //GEN-END:variables
 
 	@Autowired
 	public Window(@Value("${launcher.width}") int width, @Value("${launcher.height}") int height, @Value("${launcher.title}") String title, @Value("${launcher.version}") String version) throws IOException
 	{
-		
+
 		getLogin();
 
 		setPreferredSize(new Dimension(width, height));
@@ -292,56 +368,90 @@ public class Window extends JFrame
 		{
 			XML.setUpdates();
 			XML.setLauncherGames();
-			
+
 			nameList = new String[games.size()];
-			
+
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
 		}
 
-		//		
-		//				for(int i = 0; i < XML.getUpdates().size(); i++)
-		//				{
-		//					try
-		//					{
-		//						if(XML.getUpdates().get(i).isLatest())
-		//						{
-		//							Download.downloadGame(XML.getUpdates().get(i).getUpdateLink());
-		//							Unzip.unzip.join();
-		//		
-		//							launchGame("Etaron", "com.dalthow.etaron.Launcher", "MattsMc", "test");
-		//		
-		//						}
-		//					}
-		//					catch(Exception e)
-		//					{
-		//						e.printStackTrace();
-		//					}
-		//				}
-
-		//		for(int i = 0; i < 25; i++)
-		//		{
-		//			//games.add(new Game(version, version, version, icon));
-		//		}
 		//
-		//		for(int i = 0; i < games.size(); i++)
-		//		{
-		//			add(games.get(i));
-		//		}
+		// for(int i = 0; i < XML.getUpdates().size(); i++)
+		// {
+		// try
+		// {
+		// if(XML.getUpdates().get(i).isLatest())
+		// {
+		// Download.downloadGame(XML.getUpdates().get(i).getUpdateLink());
+		// Unzip.unzip.join();
+		//
+		// launchGame("Etaron", "com.dalthow.etaron.Launcher", "MattsMc",
+		// "test");
+		//
+		// }
+		// }
+		// catch(Exception e)
+		// {
+		// e.printStackTrace();
+		// }
+		// }
+
+		// for(int i = 0; i < 25; i++)
+		// {
+		// //games.add(new Game(version, version, version, icon));
+		// }
+		//
+		// for(int i = 0; i < games.size(); i++)
+		// {
+		// add(games.get(i));
+		// }
 		imageMap = createImageMap(nameList);
 
 		this.initComponents();
 		this.addGamesToList();
-		
+
 		pack();
 		setVisible(true);
 	}
 
+	Thread game;
+
+	private void launchGame(final String path, final String mainClass, final String username, final String password) throws IOException
+	{
+		game = new Thread()
+		{
+			@Override
+			public void run()
+			{
+				super.run();
+				Process proc;
+				try
+				{
+					proc = Runtime.getRuntime().exec("java -cp " + mainClass + " -Djava.library.path=" + System.getenv("AppData") + "/Dalthow/" + path + "/target/natives -jar " + System.getenv("AppData") + "/Dalthow/" + path + "/game.jar -username=\"" + username + "\" -password=\"" + Encrypter.encryptString(password) + "\"");
+
+					InputStream in = proc.getInputStream();
+					InputStream err = proc.getErrorStream();
+
+					java.util.Scanner error = new java.util.Scanner(err).useDelimiter("\\A");
+					System.out.println(error.hasNext() ? error.next() : "");
+					java.util.Scanner input = new java.util.Scanner(in).useDelimiter("\\A");
+					System.out.println(input.hasNext() ? input.next() : "");
+				}
+				catch(IOException e)
+				{
+					e.printStackTrace();
+				}
+
+			}
+		};
+		game.run();
+	}
+
 	private void getLogin() throws IOException
 	{
-		File file = new File(System.getenv("AppData") + "/Dalthow/Etaron/userproperties.txt");
+		File file = new File(System.getenv("AppData") + "/Dalthow/Launcher/userproperties.txt");
 		if(file.exists())
 		{
 			BufferedReader reader = new BufferedReader(new FileReader(file));

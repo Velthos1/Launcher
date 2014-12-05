@@ -6,18 +6,19 @@ import java.awt.Image;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
-public class Game extends JPanel {
+public class Game{
 	private String name;
 	private String version;
 	private ImageIcon image;
-
+	private String mainClass;
 	private String downloadLink;
 
-	public Game(String name, String version, String downloadLink, ImageIcon image) {
+	public Game(String name, String mainClass, String version, String downloadLink, ImageIcon image) {
 		this.name = name;
 		this.version = version;
 		this.downloadLink = downloadLink;
 		this.image = image;
+		this.mainClass=mainClass;
 	}
 
 	public String getVersion() {
@@ -50,5 +51,14 @@ public class Game extends JPanel {
 
 	public void setImage(ImageIcon image) {
 		this.image = image;
+	}
+	
+	public String getMainClass(){
+		return mainClass;
+	}
+	
+	public void setMainClass(String mainClass)
+	{
+		this.mainClass = mainClass;
 	}
 }
