@@ -58,7 +58,7 @@ public class Game extends JPanel {
 		if(image!=null)
 		{
 			g.drawImage(image, this.getX(), this.getY(), this);
-			g.drawString(this.name, image.getWidth(this) + 5, image.getHeight(this) + 5);
+			g.drawString(this.name, 4, image.getHeight(this) + 5);
 		}
 	}
 }
