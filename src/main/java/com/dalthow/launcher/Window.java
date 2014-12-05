@@ -25,71 +25,81 @@ import com.dalthow.launcher.framework.Unzip;
 import com.dalthow.launcher.framework.XML;
 
 @Component
-public class Window extends JFrame
-{
+public class Window extends JFrame {
 	private LinkedList<Game> games = new LinkedList<Game>();
-	
+
 	@Autowired
-	public Window(@Value("${launcher.width}") int width, @Value("${launcher.height}") int height, @Value("${launcher.title}") String title, @Value("${launcher.version}") String version)
-	{
+	public Window(@Value("${launcher.width}") int width, @Value("${launcher.height}") int height, @Value("${launcher.title}") String title, @Value("${launcher.version}") String version) {
 		this.setPreferredSize(new Dimension(width, height));
 		this.setTitle(title);
-		
+
 		Image icon = Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("global/icon.png"));
-        this.setIconImage(icon);
-        
-        try {
-			//Download.downloadGame("http://dalthow.com/share/downloads/software/etaron/etaron-alpha.zip");
-			//Unzip.unzip.join();
-			
-			launchGame(null, null);
-		} catch (Exception e){
+		this.setIconImage(icon);
+
+		try {
+			XML.setUpdates();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-        
-//        try {
-//			XML.setUpdates();
-//		} catch (Exception e){
-//			e.printStackTrace();
+
+//		for (int i = 0; i < XML.getUpdates().size(); i++) {
+//			try {
+//				if (XML.getUpdates().get(i).isLatest()) {
+//					Download.downloadGame(XML.getUpdates().get(i).getUpdateLink());
+//					Unzip.unzip.join();
+//
+//					launchGame("MattsMc", "test");
+//
+//				}
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
 //		}
-        
-        games.add(new Game(title, version, version, icon));
-        
-        for(int i = 0; i < games.size(); i++)
-        {
-        	this.add(games.get(i));
-        }
-        
+
+		try {
+			launchGame("MattsMc", "test");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		games.add(new Game(title, version, version, icon));
+
+		for (int i = 0; i < games.size(); i++) {
+			this.add(games.get(i));
+		}
+
 		this.pack();
-		this.setVisible(true);		
+		this.setVisible(true);
 	}
-	
-	private static void launchGame(String username, String password)
-			throws IOException {
-		System.setProperty("java.library.path", "target/natives"); //TODO as soon as we build the game it should work like a charm...
+
+	private static void launchGame(String username, String password) throws IOException {
+		System.setProperty("java.library.path", "target/natives"); // TODO as
+																	// soon as
+																	// we build
+																	// the game
+																	// it should
+																	// work like
+																	// a
+																	// charm...
 
 		Field field;
 
-		try
-		{
+		try {
 			field = ClassLoader.class.getDeclaredField("sys_paths");
 			field.setAccessible(true);
 			field.set(null, null);
 		}
 
-		catch(Exception error)
-		{
+		catch (Exception error) {
 			error.printStackTrace();
 		}
-		
-		Process proc = Runtime
-				.getRuntime()
-				.exec("java -cp com.dalthow.etaron.Launcher -Djava.library.path="+System.getenv("AppData")+"/Dalthow/Etaron/target/natives -jar "+System.getenv("AppData")+"/Dalthow/Etaron/etaron.jar -username=\"MattsMc\" -password=\""+Encrypter.encryptString("test")+"\"");
-		
+
+		Process proc = Runtime.getRuntime().exec("java -cp com.dalthow.etaron.Launcher -Djava.library.path=" + System.getenv("AppData") + "/Dalthow/Etaron/target/natives -jar " + System.getenv("AppData") + "/Dalthow/Etaron/etaron.jar -username=\""+username+"\" -password=\"" + Encrypter.encryptString(password) + "\"");
+
 		InputStream in = proc.getInputStream();
 		InputStream err = proc.getErrorStream();
-		java.util.Scanner error = new java.util.Scanner(err)
-				.useDelimiter("\\A");
+		java.util.Scanner error = new java.util.Scanner(err).useDelimiter("\\A");
 		System.out.println(error.hasNext() ? error.next() : "");
 		java.util.Scanner input = new java.util.Scanner(in).useDelimiter("\\A");
 		System.out.println(input.hasNext() ? input.next() : "");
