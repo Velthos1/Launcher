@@ -7,12 +7,14 @@ public class Update {
 	private String branch;
 	private String updateLink;
 	private String changelogLink;
+	private String md5;
 	
-	public Update(String version, String branch, String updateLink, String changelogLink, boolean latest, boolean resetRequired){
+	public Update(String version, String branch, String updateLink, String changelogLink, String md5, boolean latest, boolean resetRequired){
 		this.version=version;
 		this.branch=branch;
 		this.updateLink=updateLink;
 		this.changelogLink=changelogLink;
+		this.md5=md5;
 		this.latest=latest;
 		this.resetRequired=resetRequired;
 	}
@@ -56,6 +58,12 @@ public class Update {
 	}
 	public void setChangelogLink(String changelogLink) {
 		this.changelogLink = changelogLink;
+	}
+	public void setMD5(String md5){
+		this.md5=md5;
+	}
+	public String getMD5(){
+		return md5;
 	}
 	
 }

@@ -1,101 +1,88 @@
+
 package com.dalthow.launcher;
 
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.net.MalformedURLException;
 import java.util.LinkedList;
 
 import javax.swing.JFrame;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Component;
-import org.xml.sax.SAXException;
 
-import com.dalthow.launcher.framework.Download;
 import com.dalthow.launcher.framework.Encrypter;
 import com.dalthow.launcher.framework.Game;
-import com.dalthow.launcher.framework.Unzip;
 import com.dalthow.launcher.framework.XML;
 
 @Component
-public class Window extends JFrame {
-	private LinkedList<Game> games = new LinkedList<Game>();
+public class Window extends JFrame
+{
+	public static LinkedList<Game> games = new LinkedList<Game>();
 
 	@Autowired
-	public Window(@Value("${launcher.width}") int width, @Value("${launcher.height}") int height, @Value("${launcher.title}") String title, @Value("${launcher.version}") String version) {
-		this.setPreferredSize(new Dimension(width, height));
-		this.setTitle(title);
+	public Window(@Value("${launcher.width}") int width, @Value("${launcher.height}") int height, @Value("${launcher.title}") String title, @Value("${launcher.version}") String version) throws IOException
+	{
+		setPreferredSize(new Dimension(width, height));
+		setTitle(title);
 
 		Image icon = Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("global/icon.png"));
-		this.setIconImage(icon);
+		setIconImage(icon);
 
-		try {
+		try
+		{
 			XML.setUpdates();
-		} catch (Exception e) {
+			XML.setLauncherGames();
+		}
+		catch(Exception e)
+		{
 			e.printStackTrace();
 		}
 
-//		for (int i = 0; i < XML.getUpdates().size(); i++) {
-//			try {
-//				if (XML.getUpdates().get(i).isLatest()) {
+//		for(int i = 0; i < XML.getUpdates().size(); i++)
+//		{
+//			try
+//			{
+//				if(XML.getUpdates().get(i).isLatest())
+//				{
 //					Download.downloadGame(XML.getUpdates().get(i).getUpdateLink());
 //					Unzip.unzip.join();
 //
-//					launchGame("MattsMc", "test");
+//					launchGame("Etaron", "com.dalthow.etaron.Launcher", "MattsMc", "test");
 //
 //				}
-//			} catch (Exception e) {
+//			}
+//			catch(Exception e)
+//			{
 //				e.printStackTrace();
 //			}
 //		}
+		
+		for(int i = 0; i < 25; i++)
+		{
+			//games.add(new Game(version, version, version, icon));
+		}
 
-		try {
-			launchGame("MattsMc", "test");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		for(int i = 0; i < games.size(); i++)
+		{
+			add(games.get(i));
 		}
 		
-		games.add(new Game(title, version, version, icon));
-
-		for (int i = 0; i < games.size(); i++) {
-			this.add(games.get(i));
-		}
-
-		this.pack();
-		this.setVisible(true);
+		pack();
+		setVisible(true);
 	}
 
-	private static void launchGame(String username, String password) throws IOException {
-		System.setProperty("java.library.path", "target/natives"); // TODO as
-																	// soon as
-																	// we build
-																	// the game
-																	// it should
-																	// work like
-																	// a
-																	// charm...
-
-		Field field;
-
-		try {
-			field = ClassLoader.class.getDeclaredField("sys_paths");
-			field.setAccessible(true);
-			field.set(null, null);
-		}
-
-		catch (Exception error) {
-			error.printStackTrace();
-		}
-
-		Process proc = Runtime.getRuntime().exec("java -cp com.dalthow.etaron.Launcher -Djava.library.path=" + System.getenv("AppData") + "/Dalthow/Etaron/target/natives -jar " + System.getenv("AppData") + "/Dalthow/Etaron/etaron.jar -username=\""+username+"\" -password=\"" + Encrypter.encryptString(password) + "\"");
+	private static void launchGame(String path, String mainClass, String username, String password) throws IOException
+	{
+		Process proc = Runtime.getRuntime().exec("java -cp " + mainClass + " -Djava.library.path=" + System.getenv("AppData") + "/Dalthow/" + path + "/target/natives -jar " + System.getenv("AppData") + "/Dalthow/" + path + "/game.jar -username=\"" + username + "\" -password=\"" + Encrypter.encryptString(password) + "\"");
 
 		InputStream in = proc.getInputStream();
 		InputStream err = proc.getErrorStream();
@@ -103,5 +90,37 @@ public class Window extends JFrame {
 		System.out.println(error.hasNext() ? error.next() : "");
 		java.util.Scanner input = new java.util.Scanner(in).useDelimiter("\\A");
 		System.out.println(input.hasNext() ? input.next() : "");
+	}
+	
+	private void saveLogin() throws IOException{
+		File file = new File(System.getenv("AppData")+"/Dalthow/Etaron/userproperties.txt");
+		if(file.exists()){
+			file.delete();
+		}else{
+			file.createNewFile();
+		}
+		
+		String loginInfo=Encrypter.encryptString("MattsMc:"+Encrypter.encryptString("test"));
+		
+		BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+		writer.write("//DO NOT EDIT THIS FILE MANUALLY!");
+		writer.write("\n");
+		writer.write(loginInfo);
+		writer.close();
+	}
+	
+	private String getLogin() throws IOException{
+		File file = new File(System.getenv("AppData")+"/Dalthow/Etaron/userproperties.txt");
+		if(file.exists()){
+			BufferedReader reader = new BufferedReader(new FileReader(file));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				if(!line.startsWith("/")){
+					return line;
+				}
+			}
+			reader.close();
+		}
+		return null;
 	}
 }
