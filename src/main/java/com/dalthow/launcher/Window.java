@@ -252,7 +252,6 @@ public class Window extends JFrame
 				gamesPanel.add(gameControlWrapper, BorderLayout.CENTER);
 
 				tabbedPane.addTab("Games", gamesPanel);
-
 				{
 					loginPanel.setLayout(null);
 
@@ -424,13 +423,11 @@ public class Window extends JFrame
 		return map;
 	}
 
-	// JFormDesigner - End of variables declaration //GEN-END:variables
-
 	@Autowired
 	public Window(@Value("${launcher.width}") int width, @Value("${launcher.height}") int height, @Value("${launcher.title}") String title, @Value("${launcher.version}") String version) throws IOException
 	{
 
-		getLogin();
+		//getLogin();
 
 		setPreferredSize(new Dimension(width, height));
 		setTitle(title);

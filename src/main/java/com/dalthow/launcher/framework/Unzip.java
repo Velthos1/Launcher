@@ -17,7 +17,7 @@ public class Unzip {
 					String destinationname = System.getenv("AppData")+"/Dalthow/"+gameName+"/";
 					File file = new File(destinationname);
 					if(file.exists()){
-						file.delete();
+						deleteFolder(file);
 						file.mkdir();
 					}
 					byte[] buf = new byte[1024];
@@ -59,6 +59,20 @@ public class Unzip {
 					e.printStackTrace();
 				}
 				System.out.println("Unzip Complete!");
+			}
+			
+			private void deleteFolder(File folder) {
+			    File[] files = folder.listFiles();
+			    if(files!=null) {
+			        for(File f: files) {
+			            if(f.isDirectory()) {
+			                deleteFolder(f);
+			            } else {
+			                f.delete();
+			            }
+			        }
+			    }
+			    folder.delete();
 			}
 		};
 		unzip.run();
