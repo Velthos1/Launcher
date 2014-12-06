@@ -1,3 +1,4 @@
+
 package com.dalthow.launcher.utils;
 
 import java.io.BufferedReader;
@@ -14,7 +15,7 @@ public class GameUtils
 	public static boolean isGameInstalled(String dir)
 	{
 		File file = new File(dir);
-		if (file.exists())
+		if(file.exists())
 		{
 			return true;
 		}
@@ -23,29 +24,29 @@ public class GameUtils
 
 	public static boolean isUpdateAvalaible() throws IOException
 	{
-		for (int i = 0; i < Window.games.size(); i++)
+		for(int i = 0; i < Window.games.size(); i++)
 		{
 			Window.games.get(i).setUpdateAvailable(false);
 			File file = new File(Window.baseDIR + Window.games.get(i).getName() + "/application.properties");
-			if (file.exists())
+			if(file.exists())
 			{
 				String line;
 				String version = null;
 				BufferedReader reader = new BufferedReader(new FileReader(file));
-				while ((line = reader.readLine()) != null)
+				while((line = reader.readLine()) != null)
 				{
-					if (line.startsWith("game.version="))
+					if(line.startsWith("game.version="))
 					{
 						version = line.substring("game.version=".length());
 						Window.games.get(i).setVersion(version);
 					}
 				}
 				reader.close();
-				for (int j = 0; j < XML.getUpdates().size(); j++)
+				for(int j = 0; j < XML.getUpdates().size(); j++)
 				{
-					if (XML.getUpdates().get(j).getGameName().equalsIgnoreCase(Window.games.get(i).getName()) && XML.getUpdates().get(i).isLatest())
+					if(XML.getUpdates().get(j).getGameName().equalsIgnoreCase(Window.games.get(i).getName()) && XML.getUpdates().get(i).isLatest())
 					{
-						if (!XML.getUpdates().get(j).getVersion().trim().equalsIgnoreCase(version.trim()))
+						if(!XML.getUpdates().get(j).getVersion().trim().equalsIgnoreCase(version.trim()))
 						{
 							Window.games.get(i).setUpdateAvailable(true);
 							return true;
@@ -83,7 +84,8 @@ public class GameUtils
 					input.close();
 					in.close();
 
-				} catch (IOException e)
+				}
+				catch(IOException e)
 				{
 					e.printStackTrace();
 				}
@@ -93,7 +95,8 @@ public class GameUtils
 		try
 		{
 			game.join();
-		} catch (InterruptedException e)
+		}
+		catch(InterruptedException e)
 		{
 			e.printStackTrace();
 		}
@@ -107,13 +110,13 @@ public class GameUtils
 
 	public static boolean deleteDir(File file)
 	{
-		if (file.isDirectory())
+		if(file.isDirectory())
 		{
 			String[] children = file.list();
-			for (int i = 0; i < children.length; i++)
+			for(int i = 0; i < children.length; i++)
 			{
 				boolean success = deleteDir(new File(file, children[i]));
-				if (!success)
+				if(!success)
 				{
 					return false;
 				}
