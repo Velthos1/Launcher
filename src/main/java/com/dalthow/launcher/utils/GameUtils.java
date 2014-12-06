@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Scanner;
 
 import com.dalthow.launcher.Window;
 
@@ -76,10 +77,15 @@ public class GameUtils
 					InputStream in = proc.getInputStream();
 					InputStream err = proc.getErrorStream();
 
-					java.util.Scanner error = new java.util.Scanner(err).useDelimiter("\\A");
+					Scanner error = new Scanner(err).useDelimiter("\\A");
 					System.out.println(error.hasNext() ? error.next() : "");
-					java.util.Scanner input = new java.util.Scanner(in).useDelimiter("\\A");
+					error.close();
+					err.close();
+					Scanner input = new Scanner(in).useDelimiter("\\A");
 					System.out.println(input.hasNext() ? input.next() : "");
+					input.close();
+					in.close();
+
 				} catch (IOException e)
 				{
 					e.printStackTrace();
@@ -88,5 +94,29 @@ public class GameUtils
 			}
 		};
 		game.run();
+	}
+
+	public static void deleteFolder(File folder)
+	{
+		System.gc();
+		if (folder.exists())
+		{
+			File[] files = folder.listFiles();
+			if (files != null)
+			{
+				for (File f : files)
+				{
+					if (f.isDirectory())
+					{
+						deleteFolder(f);
+					}
+					else
+					{
+						f.delete();
+					}
+				}
+			}
+			folder.delete();
+		}
 	}
 }

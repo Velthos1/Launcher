@@ -55,14 +55,17 @@ import com.dalthow.launcher.utils.XML;
 @Component
 public class Window extends JFrame
 {
+	private static final long serialVersionUID = 8768561047038086348L;
+
 	public static LinkedList<Game> games = new LinkedList<Game>();
 	public static Map<String, ImageIcon> imageMap;
 
 	private static String currentUser;
 	private static String encPassword;
-	static boolean usingLoginFile = false;
+	boolean usingLoginFile = false;
 
 	public static String baseDIR = System.getenv("AppData") + "/Dalthow/";
+	public static String launcherDIR = baseDIR + "launcher/";
 
 	private JProgressBar progress;
 	private JTabbedPane tabbedPane;
@@ -140,17 +143,23 @@ public class Window extends JFrame
 	@Autowired
 	public Window(@Value("${launcher.width}") int width, @Value("${launcher.height}") int height, @Value("${launcher.title}") String title, @Value("${launcher.version}") String version) throws IOException
 	{
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(width, height));
 		setTitle(title);
 
 		Image icon = Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("global/icon.png"));
 		setIconImage(icon);
 
-		File file = new File(baseDIR + "Launcher/");
-		if (!file.exists())
+		File FbaseDIR = new File(baseDIR);
+		if (!FbaseDIR.exists())
 		{
-			file.mkdir();
+			FbaseDIR.mkdirs();
+		}
+
+		File FlauncherDIR = new File(launcherDIR);
+		if (!FlauncherDIR.exists())
+		{
+			FlauncherDIR.mkdir();
 		}
 
 		getLogin();
@@ -179,7 +188,7 @@ public class Window extends JFrame
 
 	private void saveLogin() throws IOException
 	{
-		File file = new File(baseDIR + "Launcher/userproperties.txt");
+		File file = new File(launcherDIR + "userproperties.txt");
 		if (file.exists())
 		{
 			file.delete();
@@ -198,7 +207,7 @@ public class Window extends JFrame
 
 	private void getLogin() throws IOException
 	{
-		File file = new File(baseDIR + "Launcher/userproperties.txt");
+		File file = new File(launcherDIR + "/userproperties.txt");
 		if (file.exists())
 		{
 			BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -514,7 +523,7 @@ public class Window extends JFrame
 				@Override
 				public void actionPerformed(ActionEvent e)
 				{
-					Unzip.deleteFolder(new File(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"));
+					GameUtils.deleteFolder(new File(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"));
 					updatePlayButton();
 				}
 			});
