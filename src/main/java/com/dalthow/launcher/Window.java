@@ -229,7 +229,7 @@ public class Window extends JFrame
 							playButton.setText("Download");
 						}
 						gameControl.add(playButton);
-						playButton.setBounds(10, 10, 120, 45);
+						playButton.setBounds(5, 5, 120, 35);
 
 						// ---- versionLabel ----
 						if(games.get(gameList.getSelectedIndex()).getVersion() != null)
@@ -244,25 +244,15 @@ public class Window extends JFrame
 						
 						else
 						{
-							versionLabel.setText("Ready to download: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
+							versionLabel.setText("Ready to download to version: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
 						}
 						
 						gameControl.add(versionLabel);
-						versionLabel.setBounds(140, 35, 365, versionLabel.getPreferredSize().height);
+						versionLabel.setBounds(130, 30, 100, 10);
 
-						{ // compute preferred size
-							Dimension preferredSize = new Dimension();
-							for(int i = 0; i < gameControl.getComponentCount(); i++)
-							{
-								Rectangle bounds = gameControl.getComponent(i).getBounds();
-								preferredSize.width = Math.max(bounds.x + bounds.width, preferredSize.width);
-								preferredSize.height = Math.max(bounds.y + bounds.height, preferredSize.height);
-							}
-							Insets insets = gameControl.getInsets();
-							preferredSize.width += insets.right;
-							preferredSize.height += insets.bottom;
-							gameControl.setMinimumSize(preferredSize);
-							gameControl.setPreferredSize(preferredSize);
+						{
+							gameControl.setMinimumSize(new Dimension(0, 45));
+							gameControl.setPreferredSize(new Dimension(0, 45));
 						}
 					}
 					gameControlWrapper.add(gameControl, BorderLayout.SOUTH);
@@ -362,12 +352,10 @@ public class Window extends JFrame
 									}
 
 									Download.downloadGame(downloadLink, games.get(i).getName());
-									
 									Unzip.unzip.join();
 									games.get(i).setUpdateAvailable(false);
 									isUpdateAvalaible();
 									playButton.setText("Play");
-									versionLabel.setText("Version: " + games.get(gameList.getSelectedIndex()).getVersion());
 								}
 							}
 						}
