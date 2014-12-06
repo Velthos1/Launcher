@@ -44,13 +44,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.dalthow.launcher.framework.Download;
-import com.dalthow.launcher.framework.Encrypter;
 import com.dalthow.launcher.framework.Game;
 import com.dalthow.launcher.framework.GameListRenderer;
-import com.dalthow.launcher.framework.GameUtils;
-import com.dalthow.launcher.framework.Unzip;
-import com.dalthow.launcher.framework.XML;
+import com.dalthow.launcher.utils.Download;
+import com.dalthow.launcher.utils.Encrypter;
+import com.dalthow.launcher.utils.GameUtils;
+import com.dalthow.launcher.utils.Unzip;
+import com.dalthow.launcher.utils.XML;
 
 @Component
 public class Window extends JFrame

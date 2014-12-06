@@ -1,4 +1,4 @@
-package com.dalthow.launcher.framework;
+package com.dalthow.launcher.utils;
 
 public class Update {
 	private boolean latest;

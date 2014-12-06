@@ -1,4 +1,4 @@
-package com.dalthow.launcher.framework;
+package com.dalthow.launcher.utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
