@@ -14,17 +14,16 @@ public class Unzip {
 			@Override
 			public void run() {
 				try {
-					String destinationname = System.getenv("AppData")+"/Dalthow/"+gameName+"/";
+					String destinationname = System.getenv("AppData") + "/Dalthow/" + gameName + "/";
 					File file = new File(destinationname);
-					if(file.exists()){
-						deleteFolder(file);
+					if (file.exists()) {
+						Unzip.deleteFolder(file);
 						file.mkdir();
 					}
 					byte[] buf = new byte[1024];
 					ZipInputStream zipinputstream = null;
 					ZipEntry zipentry;
-					zipinputstream = new ZipInputStream(new FileInputStream(
-							zipFile));
+					zipinputstream = new ZipInputStream(new FileInputStream(zipFile));
 
 					zipentry = zipinputstream.getNextEntry();
 					while (zipentry != null) {
@@ -60,22 +59,26 @@ public class Unzip {
 				}
 				System.out.println("Unzip Complete!");
 			}
-			
-			private void deleteFolder(File folder) {
-			    File[] files = folder.listFiles();
-			    if(files!=null) {
-			        for(File f: files) {
-			            if(f.isDirectory()) {
-			                deleteFolder(f);
-			            } else {
-			                f.delete();
-			            }
-			        }
-			    }
-			    folder.delete();
-			}
+
 		};
 		unzip.run();
 
+	}
+
+	public static void deleteFolder(File folder) {
+		System.gc();
+		if (folder.exists()) {
+			File[] files = folder.listFiles();
+			if (files != null) {
+				for (File f : files) {
+					if (f.isDirectory()) {
+						deleteFolder(f);
+					} else {
+						f.delete();
+					}
+				}
+			}
+			folder.delete();
+		}
 	}
 }

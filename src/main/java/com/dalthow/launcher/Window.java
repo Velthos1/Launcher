@@ -1,10 +1,9 @@
-
 package com.dalthow.launcher;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Desktop;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Point;
@@ -14,33 +13,32 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.plaf.FontUIResource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,7 +47,8 @@ import org.springframework.stereotype.Component;
 import com.dalthow.launcher.framework.Download;
 import com.dalthow.launcher.framework.Encrypter;
 import com.dalthow.launcher.framework.Game;
-import com.dalthow.launcher.framework.JTextAreaOutputStream;
+import com.dalthow.launcher.framework.GameListRenderer;
+import com.dalthow.launcher.framework.GameUtils;
 import com.dalthow.launcher.framework.Unzip;
 import com.dalthow.launcher.framework.XML;
 
@@ -57,67 +56,165 @@ import com.dalthow.launcher.framework.XML;
 public class Window extends JFrame
 {
 	public static LinkedList<Game> games = new LinkedList<Game>();
-	private final Map<String, ImageIcon> imageMap;
+	public static Map<String, ImageIcon> imageMap;
 
-	String username;
-	String password;
+	private static String currentUser;
+	private static String encPassword;
+	static boolean usingLoginFile = false;
+
+	public static String baseDIR = System.getenv("AppData") + "/Dalthow/";
+
+	private JProgressBar progress;
+	private JTabbedPane tabbedPane;
+	private JPanel gamesPanel;
+	private JScrollPane gameScrollPane;
+	private JList<?> gameList;
+	private JPanel loginPanel;
+	private JButton register;
+	private JButton login;
+	private JRadioButton saveCrendentials;
+	private JTextField usernameText;
+	private JPasswordField passwordTexet;
+	private JLabel usernameLabel;
+	private JLabel passwordLabel;
+	private JPanel consolePanel;
+	private JScrollPane ConsoleScrollPane;
+	private JTextArea consoleTextArea;
+	private JPanel gameControlWrapper;
+	private JPanel gameControl;
+	private JButton playButton;
+	private JLabel versionLabel;
+	private JMenuItem uninstall;
+	private JPopupMenu gameRightClick;
 
 	String[] nameList;
 
 	private void addGamesToList()
 	{
-		for(int i = 0; i < games.size(); i++)
+		for (int i = 0; i < games.size(); i++)
 		{
 			nameList[i] = games.get(i).getName();
 		}
 	}
 
-	private boolean isGameInstalled()
+	public void updatePlayButton()
 	{
-		File file = new File(System.getenv("AppData") + "/Dalthow/" + games.get(gameList.getSelectedIndex()).getName() + "/");
-		if(file.exists())
+		if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
 		{
-			return true;
-		}
-		return false;
-	}
-
-	private boolean isUpdateAvalaible() throws IOException
-	{
-		for(int i = 0; i < games.size(); i++)
-		{
-			games.get(i).setUpdateAvailable(false);
-			File file = new File(System.getenv("AppData") + "/Dalthow/" + games.get(i).getName() + "/application.properties");
-			if(file.exists())
+			if (games.get(gameList.getSelectedIndex()).isUpdateAvailable())
 			{
-				String line;
-				String version = null;
-				BufferedReader reader = new BufferedReader(new FileReader(file));
-				while((line = reader.readLine()) != null)
-				{
-					if(line.startsWith("game.version="))
-					{
-						version = line.substring("game.version=".length());
-						games.get(i).setVersion(version);
-					}
-				}
+				playButton.setText("Update");
+				versionLabel.setText("Ready to update to version: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
+			}
 
-				for(int j = 0; j < XML.getUpdates().size(); j++)
-				{
-					if(XML.getUpdates().get(j).getGameName().equalsIgnoreCase(games.get(i).getName()) && XML.getUpdates().get(i).isLatest())
-					{
-						if(!XML.getUpdates().get(j).getVersion().trim().equalsIgnoreCase(version.trim()))
-						{
-							System.out.println(XML.getUpdates().get(j).getVersion());
-							System.out.println(version);
-							games.get(i).setUpdateAvailable(true);
-							return true;
-						}
-					}
-				}
+			else
+			{
+				playButton.setText("Play");
+				versionLabel.setText("Version: " + games.get(gameList.getSelectedIndex()).getVersion());
 			}
 		}
-		return false;
+		else
+		{
+			playButton.setText("Download");
+
+			versionLabel.setText("Ready to download: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
+		}
+	}
+
+	private Map<String, ImageIcon> createImageMap(String[] list)
+	{
+		Map<String, ImageIcon> map = new HashMap<>();
+		try
+		{
+			for (int i = 0; i < games.size(); i++)
+			{
+				map.put(games.get(i).getName(), games.get(i).getImage());
+			}
+		} catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		return map;
+	}
+
+	@Autowired
+	public Window(@Value("${launcher.width}") int width, @Value("${launcher.height}") int height, @Value("${launcher.title}") String title, @Value("${launcher.version}") String version) throws IOException
+	{
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setPreferredSize(new Dimension(width, height));
+		setTitle(title);
+
+		Image icon = Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("global/icon.png"));
+		setIconImage(icon);
+
+		File file = new File(baseDIR + "Launcher/");
+		if (!file.exists())
+		{
+			file.mkdir();
+		}
+
+		getLogin();
+
+		try
+		{
+			XML.setUpdatesBETA();
+			XML.setUpdates.join();
+		} catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+		XML.setLauncherGames();
+		GameUtils.isUpdateAvalaible();
+
+		nameList = new String[games.size()];
+
+		imageMap = createImageMap(nameList);
+
+		this.initComponents();
+		this.addGamesToList();
+
+		pack();
+		setVisible(true);
+	}
+
+	private void saveLogin() throws IOException
+	{
+		File file = new File(baseDIR + "Launcher/userproperties.txt");
+		if (file.exists())
+		{
+			file.delete();
+		}
+		else
+		{
+			file.createNewFile();
+		}
+
+		BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+		writer.write("//DO NOT EDIT THIS FILE MANUALLY!");
+		writer.newLine();
+		writer.write(currentUser + ":" + encPassword);
+		writer.close();
+	}
+
+	private void getLogin() throws IOException
+	{
+		File file = new File(baseDIR + "Launcher/userproperties.txt");
+		if (file.exists())
+		{
+			BufferedReader reader = new BufferedReader(new FileReader(file));
+			String line;
+			while ((line = reader.readLine()) != null)
+			{
+				if (!line.startsWith("/"))
+				{
+					currentUser = line.split(":")[0];
+					encPassword = line.split(":")[1];
+					usingLoginFile = true;
+				}
+			}
+			reader.close();
+
+		}
 	}
 
 	private void initComponents()
@@ -142,40 +239,14 @@ public class Window extends JFrame
 		gameControl = new JPanel();
 		playButton = new JButton();
 		versionLabel = new JLabel();
+		gameRightClick = new JPopupMenu();
+		uninstall = new JMenuItem("uninstall");
 
 		gameList.setSelectedIndex(0);
 
-		MouseAdapter mouseListener = new MouseAdapter()
-		{
-			public void mouseClicked(MouseEvent mouseEvent)
-			{
-				JList theList = (JList) mouseEvent.getSource();
-				if(isGameInstalled())
-				{					
-					if(games.get(gameList.getSelectedIndex()).isUpdateAvailable())
-					{
-						playButton.setText("Update");
-						versionLabel.setText("Ready to update to version: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
-					}
-					
-					else
-					{
-						playButton.setText("Play");
-						versionLabel.setText("Version: " + games.get(gameList.getSelectedIndex()).getVersion());
-					}
-				}
-				else
-				{
-					playButton.setText("Download");
-					
-					versionLabel.setText("Ready to download: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
-				}
-			}
-		};
-
-		gameList.addMouseListener(mouseListener);
-
-		System.setOut(new PrintStream(new JTextAreaOutputStream(consoleTextArea)));
+		// TODO: Enable for console
+		// System.setOut(new PrintStream(new
+		// JTextAreaOutputStream(consoleTextArea)));
 
 		{
 			this.setMinimumSize(new Dimension(690, 485));
@@ -198,6 +269,10 @@ public class Window extends JFrame
 						gameScrollPane.setViewportView(gameList);
 						gameScrollPane.setWheelScrollingEnabled(true);
 
+						gameRightClick.add(uninstall);
+
+						gameList.setComponentPopupMenu(gameRightClick);
+
 					}
 					gamesPanel.add(gameScrollPane, BorderLayout.WEST);
 				}
@@ -212,41 +287,27 @@ public class Window extends JFrame
 						gameControl.setLayout(null);
 
 						// ---- playButton ----
-						if(isGameInstalled())
-						{
-							if(games.get(gameList.getSelectedIndex()).isUpdateAvailable())
-							{
-								playButton.setText("Update");
-
-							}
-							else
-							{
-								playButton.setText("Play");
-							}
-						}
-						else
-						{
-							playButton.setText("Download");
-						}
+						updatePlayButton();
 						gameControl.add(playButton);
 						playButton.setBounds(5, 5, 120, 35);
 
 						// ---- versionLabel ----
-						if(games.get(gameList.getSelectedIndex()).getVersion() != null)
+						if (!games.get(gameList.getSelectedIndex()).getVersion().equals("null"))
 						{
 							versionLabel.setText("Version: " + games.get(gameList.getSelectedIndex()).getVersion());
 						}
-						
-						else if(isGameInstalled())
-						{
-							versionLabel.setText("Version: " + "Could not retieve version number");
-						}
-						
+
 						else
-						{
-							versionLabel.setText("Ready to download to version: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
-						}
-						
+							if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
+							{
+								versionLabel.setText("Version: " + "Could not retieve version number");
+							}
+
+							else
+							{
+								versionLabel.setText("Ready to download to version: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
+							}
+
 						gameControl.add(versionLabel);
 						versionLabel.setBounds(130, 30, 100, 10);
 
@@ -279,6 +340,12 @@ public class Window extends JFrame
 					loginPanel.add(passwordTexet);
 					passwordTexet.setBounds(275, 185, 160, passwordTexet.getPreferredSize().height);
 
+					if (currentUser != null)
+					{
+						usernameText.setText(currentUser);
+						passwordTexet.setText(encPassword);
+					}
+
 					usernameLabel.setText("Username:");
 					loginPanel.add(usernameLabel);
 					usernameLabel.setBounds(new Rectangle(new Point(205, 155), usernameLabel.getPreferredSize()));
@@ -288,7 +355,7 @@ public class Window extends JFrame
 					passwordLabel.setBounds(new Rectangle(new Point(205, 185), passwordLabel.getPreferredSize()));
 					{
 						Dimension preferredSize = new Dimension();
-						for(int i = 0; i < loginPanel.getComponentCount(); i++)
+						for (int i = 0; i < loginPanel.getComponentCount(); i++)
 						{
 							Rectangle bounds = loginPanel.getComponent(i).getBounds();
 							preferredSize.width = Math.max(bounds.x + bounds.width, preferredSize.width);
@@ -315,6 +382,78 @@ public class Window extends JFrame
 			}
 			LauncherContentPane.add(tabbedPane, BorderLayout.CENTER);
 
+			this.login.addActionListener(new ActionListener()
+			{
+
+				@Override
+				public void actionPerformed(ActionEvent arg0)
+				{
+					String username = usernameText.getText();
+					char passwordChar[] = passwordTexet.getPassword();
+					String password = "";
+					for (int i = 0; i < passwordChar.length; i++)
+					{
+						password += passwordChar[i];
+					}
+					if (!username.trim().equals("") || !password.equals(""))
+					{
+						System.out.println(usingLoginFile);
+						if (!usingLoginFile)
+						{
+							Window.currentUser = username;
+							Window.encPassword = Encrypter.encryptString(password);
+							if (saveCrendentials.isSelected())
+							{
+								try
+								{
+									saveLogin();
+								} catch (IOException e)
+								{
+									e.printStackTrace();
+								}
+							}
+							// TODO: Login
+						}
+						else
+						{
+							if (Window.currentUser.equalsIgnoreCase(username) && Window.encPassword.equalsIgnoreCase(password))
+							{
+								// TODO: Login
+							}
+							else
+							{
+								usingLoginFile = false;
+								this.actionPerformed(arg0);
+							}
+						}
+					}
+					else
+					{
+
+					}
+				}
+			});
+
+			this.register.addActionListener(new ActionListener()
+			{
+				@Override
+				public void actionPerformed(ActionEvent arg0)
+				{
+					Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+					if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE))
+					{
+						try
+						{
+							System.out.println("Opening Registration Website");
+							desktop.browse(new URL("http://dalthow.com/registration.php").toURI());
+						} catch (Exception e)
+						{
+							e.printStackTrace();
+						}
+					}
+				}
+			});
+
 			this.playButton.addActionListener(new ActionListener()
 			{
 
@@ -324,26 +463,26 @@ public class Window extends JFrame
 					try
 					{
 
-						for(int i = 0; i < games.size(); i++)
+						for (int i = 0; i < games.size(); i++)
 						{
-							if(gameList.getSelectedValue().equals(games.get(i).getName()))
+							if (gameList.getSelectedValue().equals(games.get(i).getName()))
 							{
 								String output = games.get(i).getName().substring(0, 1).toUpperCase() + games.get(i).getName().substring(1);
 
-								if(isGameInstalled() && !games.get(i).isUpdateAvailable())
+								if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/") && !games.get(i).isUpdateAvailable())
 								{
-									launchGame(output, games.get(i).getMainClass(), "MattsMc", "test");
+									GameUtils.launchGame(output, games.get(i).getMainClass(), "MattsMc", "test");
 								}
 
 								else
 								{
 									String downloadLink = null;
 
-									for(int j = 0; j < XML.getUpdates().size(); j++)
+									for (int j = 0; j < XML.getUpdates().size(); j++)
 									{
-										if(games.get(i).getName().equalsIgnoreCase(XML.getUpdates().get(j).getGameName()))
+										if (games.get(i).getName().equalsIgnoreCase(XML.getUpdates().get(j).getGameName()))
 										{
-											if(XML.getUpdates().get(j).isLatest())
+											if (XML.getUpdates().get(j).isLatest())
 											{
 												System.out.println(XML.getUpdates().get(j).getGameName());
 												downloadLink = XML.getUpdates().get(j).getUpdateLink();
@@ -354,18 +493,15 @@ public class Window extends JFrame
 									Download.downloadGame(downloadLink, games.get(i).getName());
 									Unzip.unzip.join();
 									games.get(i).setUpdateAvailable(false);
-									isUpdateAvalaible();
-									playButton.setText("Play");
+									updatePlayButton();
 								}
 							}
 						}
 
-					}
-					catch(IOException e)
+					} catch (IOException e)
 					{
 						e.printStackTrace();
-					}
-					catch(InterruptedException e)
+					} catch (InterruptedException e)
 					{
 						e.printStackTrace();
 					}
@@ -373,149 +509,28 @@ public class Window extends JFrame
 
 			});
 
+			this.uninstall.addActionListener(new ActionListener()
+			{
+				@Override
+				public void actionPerformed(ActionEvent e)
+				{
+					Unzip.deleteFolder(new File(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"));
+					updatePlayButton();
+				}
+			});
+
+			this.gameList.addMouseListener(new MouseAdapter()
+			{
+				@Override
+				public void mouseClicked(MouseEvent mouseEvent)
+				{
+					updatePlayButton();
+				}
+			});
+
 			this.pack();
 			this.setLocationRelativeTo(this.getOwner());
 		}
 	}
 
-	private JProgressBar progress;
-	private JTabbedPane tabbedPane;
-	private JPanel gamesPanel;
-	private JScrollPane gameScrollPane;
-	private JList<?> gameList;
-	private JPanel loginPanel;
-	private JButton register;
-	private JButton login;
-	private JRadioButton saveCrendentials;
-	private JTextField usernameText;
-	private JPasswordField passwordTexet;
-	private JLabel usernameLabel;
-	private JLabel passwordLabel;
-	private JPanel consolePanel;
-	private JScrollPane ConsoleScrollPane;
-	private JTextArea consoleTextArea;
-	private JPanel gameControlWrapper;
-	private JPanel gameControl;
-	private JButton playButton;
-	private JLabel versionLabel;
-
-	public class GameListRenderer extends DefaultListCellRenderer
-	{
-		Font font = new Font("helvitica", Font.BOLD, 24);
-
-		@Override
-		public java.awt.Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus)
-		{
-			JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-			label.setIcon(imageMap.get((String) value));
-			label.setHorizontalTextPosition(JLabel.RIGHT);
-			label.setFont(font);
-			return label;
-		}
-	}
-
-	private Map<String, ImageIcon> createImageMap(String[] list)
-	{
-		Map<String, ImageIcon> map = new HashMap<>();
-		try
-		{
-			for(int i = 0; i < games.size(); i++)
-			{
-				map.put(games.get(i).getName(), games.get(i).getImage());
-			}
-		}
-		catch(Exception ex)
-		{
-			ex.printStackTrace();
-		}
-		return map;
-	}
-
-	@Autowired
-	public Window(@Value("${launcher.width}") int width, @Value("${launcher.height}") int height, @Value("${launcher.title}") String title, @Value("${launcher.version}") String version) throws IOException
-	{
-
-		//getLogin();
-
-		setPreferredSize(new Dimension(width, height));
-		setTitle(title);
-
-		Image icon = Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("global/icon.png"));
-		setIconImage(icon);
-
-		try
-		{
-			XML.setUpdatesBETA();
-			XML.setUpdates.join();
-
-		}
-		catch(InterruptedException e)
-		{
-			e.printStackTrace();
-		}
-		XML.setLauncherGames();
-		this.isUpdateAvalaible();
-
-		nameList = new String[games.size()];
-
-		imageMap = createImageMap(nameList);
-
-		this.initComponents();
-		this.addGamesToList();
-
-		pack();
-		setVisible(true);
-	}
-
-	Thread game;
-
-	private void launchGame(final String path, final String mainClass, final String username, final String password) throws IOException
-	{
-		game = new Thread()
-		{
-			@Override
-			public void run()
-			{
-				super.run();
-				Process proc;
-				try
-				{
-					proc = Runtime.getRuntime().exec("java -cp " + mainClass + " -Djava.library.path=" + System.getenv("AppData") + "/Dalthow/" + path + "/target/natives -jar " + System.getenv("AppData") + "/Dalthow/" + path + "/game.jar -username=\"" + username + "\" -password=\"" + Encrypter.encryptString(password) + "\"");
-
-					InputStream in = proc.getInputStream();
-					InputStream err = proc.getErrorStream();
-
-					java.util.Scanner error = new java.util.Scanner(err).useDelimiter("\\A");
-					System.out.println(error.hasNext() ? error.next() : "");
-					java.util.Scanner input = new java.util.Scanner(in).useDelimiter("\\A");
-					System.out.println(input.hasNext() ? input.next() : "");
-				}
-				catch(IOException e)
-				{
-					e.printStackTrace();
-				}
-
-			}
-		};
-		game.run();
-	}
-
-	private void getLogin() throws IOException
-	{
-		File file = new File(System.getenv("AppData") + "/Dalthow/Launcher/userproperties.txt");
-		if(file.exists())
-		{
-			BufferedReader reader = new BufferedReader(new FileReader(file));
-			String line;
-			while((line = reader.readLine()) != null)
-			{
-				if(!line.startsWith("/"))
-				{
-					username = line.split(":")[0];
-					password = line.split(":")[1];
-				}
-			}
-			reader.close();
-		}
-	}
 }

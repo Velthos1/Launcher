@@ -1,0 +1,92 @@
+package com.dalthow.launcher.framework;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+
+import com.dalthow.launcher.Window;
+
+public class GameUtils
+{
+	public static boolean isGameInstalled(String dir)
+	{
+		File file = new File(dir);
+		if (file.exists())
+		{
+			return true;
+		}
+		return false;
+	}
+
+	public static boolean isUpdateAvalaible() throws IOException
+	{
+		for (int i = 0; i < Window.games.size(); i++)
+		{
+			Window.games.get(i).setUpdateAvailable(false);
+			File file = new File(Window.baseDIR + Window.games.get(i).getName() + "/application.properties");
+			if (file.exists())
+			{
+				String line;
+				String version = null;
+				BufferedReader reader = new BufferedReader(new FileReader(file));
+				while ((line = reader.readLine()) != null)
+				{
+					if (line.startsWith("game.version="))
+					{
+						version = line.substring("game.version=".length());
+						Window.games.get(i).setVersion(version);
+					}
+				}
+				reader.close();
+				for (int j = 0; j < XML.getUpdates().size(); j++)
+				{
+					if (XML.getUpdates().get(j).getGameName().equalsIgnoreCase(Window.games.get(i).getName()) && XML.getUpdates().get(i).isLatest())
+					{
+						if (!XML.getUpdates().get(j).getVersion().trim().equalsIgnoreCase(version.trim()))
+						{
+							System.out.println(XML.getUpdates().get(j).getVersion());
+							System.out.println(version);
+							Window.games.get(i).setUpdateAvailable(true);
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	public static Thread game;
+
+	public static void launchGame(final String path, final String mainClass, final String username, final String password) throws IOException
+	{
+		game = new Thread()
+		{
+			@Override
+			public void run()
+			{
+				super.run();
+				Process proc;
+				try
+				{
+					proc = Runtime.getRuntime().exec("java -cp " + mainClass + " -Djava.library.path=" + Window.baseDIR + path + "/target/natives -jar " + System.getenv("AppData") + "/Dalthow/" + path + "/game.jar -username=\"" + username + "\" -password=\"" + Encrypter.encryptString(password) + "\"");
+
+					InputStream in = proc.getInputStream();
+					InputStream err = proc.getErrorStream();
+
+					java.util.Scanner error = new java.util.Scanner(err).useDelimiter("\\A");
+					System.out.println(error.hasNext() ? error.next() : "");
+					java.util.Scanner input = new java.util.Scanner(in).useDelimiter("\\A");
+					System.out.println(input.hasNext() ? input.next() : "");
+				} catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+
+			}
+		};
+		game.run();
+	}
+}
