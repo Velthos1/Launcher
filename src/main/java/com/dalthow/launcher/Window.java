@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -44,13 +45,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.dalthow.launcher.framework.Download;
-import com.dalthow.launcher.framework.Encrypter;
 import com.dalthow.launcher.framework.Game;
 import com.dalthow.launcher.framework.GameListRenderer;
-import com.dalthow.launcher.framework.GameUtils;
-import com.dalthow.launcher.framework.Unzip;
-import com.dalthow.launcher.framework.XML;
+import com.dalthow.launcher.framework.JTextAreaOutputStream;
+import com.dalthow.launcher.utils.Download;
+import com.dalthow.launcher.utils.Encrypter;
+import com.dalthow.launcher.utils.GameUtils;
+import com.dalthow.launcher.utils.Unzip;
+import com.dalthow.launcher.utils.XML;
 
 @Component
 public class Window extends JFrame
@@ -240,13 +242,11 @@ public class Window extends JFrame
 		playButton = new JButton();
 		versionLabel = new JLabel();
 		gameRightClick = new JPopupMenu();
-		uninstall = new JMenuItem("uninstall");
+		uninstall = new JMenuItem("Un-Install");
 
 		gameList.setSelectedIndex(0);
 
-		// TODO: Enable for console
-		// System.setOut(new PrintStream(new
-		// JTextAreaOutputStream(consoleTextArea)));
+		System.setOut(new PrintStream(new JTextAreaOutputStream(consoleTextArea)));
 
 		{
 			this.setMinimumSize(new Dimension(690, 485));
@@ -514,7 +514,7 @@ public class Window extends JFrame
 				@Override
 				public void actionPerformed(ActionEvent e)
 				{
-					Unzip.deleteFolder(new File(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"));
+					GameUtils.deleteFolder(new File(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"));
 					updatePlayButton();
 				}
 			});

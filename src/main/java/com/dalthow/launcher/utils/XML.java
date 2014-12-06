@@ -1,4 +1,4 @@
-package com.dalthow.launcher.framework;
+package com.dalthow.launcher.utils;
 
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -22,6 +22,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.dalthow.launcher.Window;
+import com.dalthow.launcher.framework.Game;
+import com.dalthow.launcher.framework.Update;
 
 public class XML {
 

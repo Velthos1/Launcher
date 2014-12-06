@@ -1,4 +1,4 @@
-package com.dalthow.launcher.framework;
+package com.dalthow.launcher.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -88,5 +88,29 @@ public class GameUtils
 			}
 		};
 		game.run();
+	}
+
+	public static void deleteFolder(File folder)
+	{
+		System.gc();
+		if (folder.exists())
+		{
+			File[] files = folder.listFiles();
+			if (files != null)
+			{
+				for (File f : files)
+				{
+					if (f.isDirectory())
+					{
+						deleteFolder(f);
+					}
+					else
+					{
+						f.delete();
+					}
+				}
+			}
+			folder.delete();
+		}
 	}
 }
