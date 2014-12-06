@@ -28,6 +28,7 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -73,6 +74,7 @@ public class Window extends JFrame
 
 	public static JProgressBar progress;
 	private JTabbedPane tabbedPane;
+	private JTabbedPane gameInfo;
 	private JPanel gamesPanel;
 	private JScrollPane gameScrollPane;
 	private JList<?> gameList;
@@ -93,6 +95,7 @@ public class Window extends JFrame
 	private JLabel versionLabel;
 	private JMenuItem uninstall;
 	private JPopupMenu gameRightClick;
+	private JEditorPane newsFeed;
 
 	String[] nameList;
 
@@ -128,6 +131,16 @@ public class Window extends JFrame
 			uninstall.setEnabled(false);
 
 			versionLabel.setText("Ready to download: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
+		}
+		
+		try
+		{
+			newsFeed.setPage(XML.getUpdates().get(this.gameList.getSelectedIndex()).getChangelogLink());
+		}
+		catch(IOException e1)
+		{
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 	}
 
@@ -240,8 +253,10 @@ public class Window extends JFrame
 
 	private void initComponents()
 	{
+		newsFeed = new JEditorPane();
 		progress = new JProgressBar();
 		tabbedPane = new JTabbedPane();
+		gameInfo = new JTabbedPane();
 		gamesPanel = new JPanel();
 		gameScrollPane = new JScrollPane();
 		gameList = new JList<Object>(nameList);
@@ -294,6 +309,7 @@ public class Window extends JFrame
 
 					}
 					gamesPanel.add(gameScrollPane, BorderLayout.WEST);
+					gamesPanel.add(newsFeed, BorderLayout.CENTER);
 				}
 
 				// ======== gameControlWrapper ========
@@ -332,8 +348,34 @@ public class Window extends JFrame
 					}
 					gameControlWrapper.add(gameControl, BorderLayout.SOUTH);
 				}
-				gamesPanel.add(gameControlWrapper, BorderLayout.CENTER);
-
+				
+				JPanel wrapper;
+				
+				wrapper = new JPanel();
+				wrapper.setLayout(new BorderLayout());
+				wrapper.add(newsFeed, BorderLayout.CENTER);
+				
+				newsFeed.setEditable(false);
+				
+				try
+				{
+					newsFeed.setPage(XML.getUpdates().get(this.gameList.getSelectedIndex()).getChangelogLink());
+				}
+				catch(IOException e1)
+				{
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+				gameInfo.addTab("Changelog", wrapper);
+				{
+					
+				}
+				
+				wrapper.add(gameControlWrapper, BorderLayout.SOUTH);
+				gamesPanel.add(gameInfo, BorderLayout.CENTER);
+				
+				//ep.setPage("http://" + IDN.toASCII(url));
 				tabbedPane.addTab("Games", gamesPanel);
 				{
 					loginPanel.setLayout(null);
