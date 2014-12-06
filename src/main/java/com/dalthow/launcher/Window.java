@@ -151,20 +151,24 @@ public class Window extends JFrame
 			{
 				JList theList = (JList) mouseEvent.getSource();
 				if(isGameInstalled())
-				{
-					versionLabel.setText("Version: " + games.get(gameList.getSelectedIndex()).getVersion());
+				{					
 					if(games.get(gameList.getSelectedIndex()).isUpdateAvailable())
 					{
 						playButton.setText("Update");
+						versionLabel.setText("Ready to update to version: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
 					}
+					
 					else
 					{
 						playButton.setText("Play");
+						versionLabel.setText("Version: " + games.get(gameList.getSelectedIndex()).getVersion());
 					}
 				}
 				else
 				{
 					playButton.setText("Download");
+					
+					versionLabel.setText("Ready to download: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
 				}
 			}
 		};
@@ -228,7 +232,21 @@ public class Window extends JFrame
 						playButton.setBounds(10, 10, 120, 45);
 
 						// ---- versionLabel ----
-						versionLabel.setText("Version: " + games.get(gameList.getSelectedIndex()).getVersion());
+						if(games.get(gameList.getSelectedIndex()).getVersion() != null)
+						{
+							versionLabel.setText("Version: " + games.get(gameList.getSelectedIndex()).getVersion());
+						}
+						
+						else if(isGameInstalled())
+						{
+							versionLabel.setText("Version: " + "Could not retieve version number");
+						}
+						
+						else
+						{
+							versionLabel.setText("Ready to download: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
+						}
+						
 						gameControl.add(versionLabel);
 						versionLabel.setBounds(140, 35, 365, versionLabel.getPreferredSize().height);
 
