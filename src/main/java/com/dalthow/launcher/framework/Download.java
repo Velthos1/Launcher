@@ -11,11 +11,11 @@ import java.nio.channels.ReadableByteChannel;
 public class Download
 {
 	public static Thread download;
-	
-	public static void downloadGame(final String url) throws MalformedURLException {
+	public static void downloadGame(final String url, final String gameName) throws MalformedURLException {
 	download = new Thread() {
 		public void run() {
-			File downloadFolder = new File(System.getProperty("java.io.tmpdir")+"/etaron/");
+			
+			File downloadFolder = new File(System.getProperty("java.io.tmpdir")+"/Dalthow/");
 			try {
 				if(!downloadFolder.exists()){
 					downloadFolder.mkdir();
@@ -24,11 +24,11 @@ public class Download
 						url);
 				ReadableByteChannel rbc = Channels.newChannel(website
 						.openStream());
-				FileOutputStream fos = new FileOutputStream(downloadFolder+"etarondownload.zip");
+				FileOutputStream fos = new FileOutputStream(downloadFolder+gameName+"download.zip");
 			
 				fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 				System.out.println("Download Complete!");
-				Unzip.unpackGame(downloadFolder+"etarondownload.zip");
+				Unzip.unpackGame(downloadFolder+gameName+"download.zip", gameName);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

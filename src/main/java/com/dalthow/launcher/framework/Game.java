@@ -12,13 +12,15 @@ public class Game{
 	private ImageIcon image;
 	private String mainClass;
 	private String downloadLink;
+	private boolean updateAvailable;
 
-	public Game(String name, String mainClass, String version, String downloadLink, ImageIcon image) {
+	public Game(String name, String mainClass, String version, String downloadLink, ImageIcon image, boolean updateAvailable) {
 		this.name = name;
 		this.version = version;
 		this.downloadLink = downloadLink;
 		this.image = image;
 		this.mainClass=mainClass;
+		this.setUpdateAvailable(updateAvailable);
 	}
 
 	public String getVersion() {
@@ -60,5 +62,13 @@ public class Game{
 	public void setMainClass(String mainClass)
 	{
 		this.mainClass = mainClass;
+	}
+
+	public boolean isUpdateAvailable() {
+		return updateAvailable;
+	}
+
+	public void setUpdateAvailable(boolean updateAvailable) {
+		this.updateAvailable = updateAvailable;
 	}
 }

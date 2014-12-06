@@ -46,42 +46,90 @@ public class XML {
 		return updates;
 	}
 
-	public static void setUpdates() throws ParserConfigurationException, MalformedURLException, SAXException, IOException {
-		updates.clear();
+	public static Thread setUpdates;
+	static int index = 0;
 
-		NodeList updatelist = doc.getElementsByTagName("update");
+	public static void setUpdatesBETA() {
+		setUpdates = new Thread() {
+			@Override
+			public void run() {
+				super.run();
+				System.out.println("setupdates running");
+				updates.clear();
 
-		for (int i = 0; i < updatelist.getLength(); i++) {
-			Node n = updatelist.item(i);
-			if (n.getNodeType() == Node.ELEMENT_NODE) {
-				Element update = (Element) n;
-
-				String version = update.getAttribute("version");
-				String branch = update.getAttribute("branch");
-				boolean latest = Boolean.parseBoolean(update.getAttribute("latest"));
-				System.out.println(latest);
-				boolean requireReset = Boolean.parseBoolean(update.getAttribute("requireReset"));
+				String game;
+				String version = null;
+				String branch = null;
+				boolean latest = false;
+				boolean requireReset = false;
 				String link = null;
 				String changelog = null;
 				String md5 = null;
 
-				NodeList nl = update.getChildNodes();
-				for (int j = 0; j < nl.getLength(); j++) {
-					Node nc = nl.item(j);
-					if (nc.getNodeType() == Node.ELEMENT_NODE && nc.getNodeName().equals("link")) {
-						link = nc.getTextContent().trim();
-					}
-					if (nc.getNodeType() == Node.ELEMENT_NODE && nc.getNodeName().equals("changelog")) {
-						changelog = nc.getTextContent().trim();
-					}
-					if (nc.getNodeType() == Node.ELEMENT_NODE && nc.getNodeName().equals("md5")) {
-						md5 = nc.getTextContent().trim();
-					}
+				NodeList gameList = doc.getElementsByTagName("games");
+				for (int v = 0; v < gameList.getLength(); v++) {
+					Node t = gameList.item(v);
+					if (t.getNodeType() == Node.ELEMENT_NODE) {
+						NodeList p = t.getChildNodes();
+						for (int j = 0; j < p.getLength(); j++) {
+							Node q = p.item(j);
+							if (q.getNodeType() == Node.ELEMENT_NODE) {
+								game = q.getNodeName();
+								NodeList u = q.getChildNodes();
+								for (int z = 0; z < u.getLength(); z++) {
+									Node x = u.item(z);
+									if (x.getNodeType() == Node.ELEMENT_NODE) {
+										if (x.getNodeName() == "update") {
 
+											Element update = (Element) x;
+											System.out.println(update.getNodeName());
+											version = update.getAttribute("version");
+											branch = update.getAttribute("branch");
+											latest = Boolean.parseBoolean(update.getAttribute("latest"));
+											System.out.println(update.getAttribute("latest"));
+											requireReset = Boolean.parseBoolean(update.getAttribute("requireReset"));
+											link = null;
+											changelog = null;
+											md5 = null;
+
+											NodeList updatelist = x.getChildNodes();
+
+											for (int i = 0; i < updatelist.getLength(); i++) {
+												Node n = updatelist.item(i);
+												if (n.getNodeType() == Node.ELEMENT_NODE) {
+													NodeList nl = update.getChildNodes();
+
+													for (int b = 0; b < nl.getLength(); b++) {
+														Node nc = nl.item(b);
+														if (nc.getNodeType() == Node.ELEMENT_NODE && nc.getNodeName().equals("link")) {
+															link = nc.getTextContent().trim();
+														}
+														if (nc.getNodeType() == Node.ELEMENT_NODE && nc.getNodeName().equals("changelog")) {
+															changelog = nc.getTextContent().trim();
+														}
+														if (nc.getNodeType() == Node.ELEMENT_NODE && nc.getNodeName().equals("md5")) {
+															md5 = nc.getTextContent().trim();
+														}
+
+													}
+
+												}//
+											}
+											System.out.println(index);
+											updates.put(index, new Update(game, version, branch, link, changelog, md5, latest, requireReset));
+											index++;
+										}
+
+									}
+
+								}
+							}
+						}
+					}
 				}
-				updates.put(updates.isEmpty() ? 0 : updates.size() + 1, new Update(version, branch, link, changelog, md5, latest, requireReset));
 			}
-		}
+		};
+		setUpdates.run();
 	}
 
 	public static void setLauncherGames() {
@@ -103,15 +151,22 @@ public class XML {
 						imageURL = nc.getTextContent().trim();
 					}
 				}
-				
-				try
-				{
-					Window.games.add(new Game(gameName, mainClass, "", "", new ImageIcon(new URL(imageURL))));
-				}
-				catch(MalformedURLException e)
-				{
-					// TODO Auto-generated catch block
+
+				try {
+					String downloadLink = null;
+					synchronized (getUpdates()) {
+						for (int z = 0; z < getUpdates().size(); z++) {
+							if (!(getUpdates().get(z) == null)) {
+								if (getUpdates().get(z).isLatest()) {
+									downloadLink = getUpdates().get(z).getUpdateLink();
+								}
+							}
+						}
+						Window.games.add(new Game(gameName, mainClass, null, downloadLink, new ImageIcon(new URL(imageURL)), false));
+					}
+				} catch (MalformedURLException e) {
 					e.printStackTrace();
+
 				}
 			}
 		}

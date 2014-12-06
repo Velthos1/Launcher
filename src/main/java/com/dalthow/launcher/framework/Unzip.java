@@ -9,12 +9,17 @@ import java.util.zip.ZipInputStream;
 public class Unzip {
 	public static Thread unzip;
 
-	public static void unpackGame(final String zipFile) {
+	public static void unpackGame(final String zipFile, final String gameName) {
 		unzip = new Thread() {
 			@Override
 			public void run() {
 				try {
-					String destinationname = System.getenv("AppData")+"/Dalthow/Etaron/";
+					String destinationname = System.getenv("AppData")+"/Dalthow/"+gameName+"/";
+					File file = new File(destinationname);
+					if(file.exists()){
+						file.delete();
+						file.mkdir();
+					}
 					byte[] buf = new byte[1024];
 					ZipInputStream zipinputstream = null;
 					ZipEntry zipentry;

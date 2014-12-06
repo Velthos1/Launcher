@@ -17,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +40,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.plaf.FontUIResource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,11 +71,51 @@ public class Window extends JFrame
 			nameList[i] = games.get(i).getName();
 		}
 	}
-	
-	private boolean isGameInstalled(){
-		File file = new File(System.getenv("AppData")+"/Dalthow/"+games.get(gameList.getSelectedIndex()).getName()+"/");
-		if(file.exists()){
+
+	private boolean isGameInstalled()
+	{
+		File file = new File(System.getenv("AppData") + "/Dalthow/" + games.get(gameList.getSelectedIndex()).getName() + "/");
+		if(file.exists())
+		{
 			return true;
+		}
+		return false;
+	}
+
+	private boolean isUpdateAvalaible() throws IOException
+	{
+		for(int i = 0; i < games.size(); i++)
+		{
+			games.get(i).setUpdateAvailable(false);
+			File file = new File(System.getenv("AppData") + "/Dalthow/" + games.get(i).getName() + "/application.properties");
+			if(file.exists())
+			{
+				String line;
+				String version = null;
+				BufferedReader reader = new BufferedReader(new FileReader(file));
+				while((line = reader.readLine()) != null)
+				{
+					if(line.startsWith("game.version="))
+					{
+						version = line.substring("game.version=".length());
+						games.get(i).setVersion(version);
+					}
+				}
+
+				for(int j = 0; j < XML.getUpdates().size(); j++)
+				{
+					if(XML.getUpdates().get(j).getGameName().equalsIgnoreCase(games.get(i).getName()) && XML.getUpdates().get(i).isLatest())
+					{
+						if(!XML.getUpdates().get(j).getVersion().trim().equalsIgnoreCase(version.trim()))
+						{
+							System.out.println(XML.getUpdates().get(j).getVersion());
+							System.out.println(version);
+							games.get(i).setUpdateAvailable(true);
+							return true;
+						}
+					}
+				}
+			}
 		}
 		return false;
 	}
@@ -102,20 +144,33 @@ public class Window extends JFrame
 		versionLabel = new JLabel();
 
 		gameList.setSelectedIndex(0);
-		
-		MouseAdapter mouseListener = new MouseAdapter() {
-		      public void mouseClicked(MouseEvent mouseEvent) {
-		        JList theList = (JList) mouseEvent.getSource();
-		        if(isGameInstalled()){
-		        	playButton.setText("Play");
-		        }else{
-		        	playButton.setText("Download");
-		        }
-		      }
-		    };
-		    
-		    gameList.addMouseListener(mouseListener);
-		
+
+		MouseAdapter mouseListener = new MouseAdapter()
+		{
+			public void mouseClicked(MouseEvent mouseEvent)
+			{
+				JList theList = (JList) mouseEvent.getSource();
+				if(isGameInstalled())
+				{
+					versionLabel.setText("Version: " + games.get(gameList.getSelectedIndex()).getVersion());
+					if(games.get(gameList.getSelectedIndex()).isUpdateAvailable())
+					{
+						playButton.setText("Update");
+					}
+					else
+					{
+						playButton.setText("Play");
+					}
+				}
+				else
+				{
+					playButton.setText("Download");
+				}
+			}
+		};
+
+		gameList.addMouseListener(mouseListener);
+
 		System.setOut(new PrintStream(new JTextAreaOutputStream(consoleTextArea)));
 
 		{
@@ -153,17 +208,27 @@ public class Window extends JFrame
 						gameControl.setLayout(null);
 
 						// ---- playButton ----
-						if(isGameInstalled()){
-						playButton.setText("Play");
-						
-						}else{
+						if(isGameInstalled())
+						{
+							if(games.get(gameList.getSelectedIndex()).isUpdateAvailable())
+							{
+								playButton.setText("Update");
+
+							}
+							else
+							{
+								playButton.setText("Play");
+							}
+						}
+						else
+						{
 							playButton.setText("Download");
 						}
 						gameControl.add(playButton);
 						playButton.setBounds(10, 10, 120, 45);
 
 						// ---- versionLabel ----
-						versionLabel.setText("Version");
+						versionLabel.setText("Version: " + games.get(gameList.getSelectedIndex()).getVersion());
 						gameControl.add(versionLabel);
 						versionLabel.setBounds(140, 35, 365, versionLabel.getPreferredSize().height);
 
@@ -257,32 +322,44 @@ public class Window extends JFrame
 							if(gameList.getSelectedValue().equals(games.get(i).getName()))
 							{
 								String output = games.get(i).getName().substring(0, 1).toUpperCase() + games.get(i).getName().substring(1);
-								
-								if(isGameInstalled())
+
+								if(isGameInstalled() && !games.get(i).isUpdateAvailable())
 								{
 									launchGame(output, games.get(i).getMainClass(), "MattsMc", "test");
 								}
-								
+
 								else
 								{
-									 Download.downloadGame(XML.getUpdates().get(i).getUpdateLink());
-									 Unzip.unzip.join();
-									 
-									 playButton.setText("Play");
+									String downloadLink = null;
+
+									for(int j = 0; j < XML.getUpdates().size(); j++)
+									{
+										if(games.get(i).getName().equalsIgnoreCase(XML.getUpdates().get(j).getGameName()))
+										{
+											if(XML.getUpdates().get(j).isLatest())
+											{
+												System.out.println(XML.getUpdates().get(j).getGameName());
+												downloadLink = XML.getUpdates().get(j).getUpdateLink();
+											}
+										}
+									}
+
+									Download.downloadGame(downloadLink, games.get(i).getName());
+									Unzip.unzip.join();
+									games.get(i).setUpdateAvailable(false);
+									isUpdateAvalaible();
+									playButton.setText("Play");
 								}
-							} 
+							}
 						}
 
-						
 					}
 					catch(IOException e)
 					{
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					catch(InterruptedException e)
 					{
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -347,9 +424,6 @@ public class Window extends JFrame
 		return map;
 	}
 
-	    
-	    
-	
 	// JFormDesigner - End of variables declaration //GEN-END:variables
 
 	@Autowired
@@ -366,47 +440,19 @@ public class Window extends JFrame
 
 		try
 		{
-			XML.setUpdates();
-			XML.setLauncherGames();
-
-			nameList = new String[games.size()];
+			XML.setUpdatesBETA();
+			XML.setUpdates.join();
 
 		}
-		catch(Exception e)
+		catch(InterruptedException e)
 		{
 			e.printStackTrace();
 		}
+		XML.setLauncherGames();
+		this.isUpdateAvalaible();
 
-		//
-		// for(int i = 0; i < XML.getUpdates().size(); i++)
-		// {
-		// try
-		// {
-		// if(XML.getUpdates().get(i).isLatest())
-		// {
-		// Download.downloadGame(XML.getUpdates().get(i).getUpdateLink());
-		// Unzip.unzip.join();
-		//
-		// launchGame("Etaron", "com.dalthow.etaron.Launcher", "MattsMc",
-		// "test");
-		//
-		// }
-		// }
-		// catch(Exception e)
-		// {
-		// e.printStackTrace();
-		// }
-		// }
+		nameList = new String[games.size()];
 
-		// for(int i = 0; i < 25; i++)
-		// {
-		// //games.add(new Game(version, version, version, icon));
-		// }
-		//
-		// for(int i = 0; i < games.size(); i++)
-		// {
-		// add(games.get(i));
-		// }
 		imageMap = createImageMap(nameList);
 
 		this.initComponents();
