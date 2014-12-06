@@ -7,7 +7,7 @@
  *
  **/
 
-package com.dalthow.launcher.utils;
+package com.dalthow.launcher.framework;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
