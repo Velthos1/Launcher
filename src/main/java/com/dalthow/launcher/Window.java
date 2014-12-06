@@ -77,6 +77,7 @@ public class Window extends JFrame
 	private JTabbedPane gameInfo;
 	private JPanel gamesPanel;
 	private JScrollPane gameScrollPane;
+	private JScrollPane changeLogScrollPane;
 	private JList<?> gameList;
 	private JPanel loginPanel;
 	private JButton register;
@@ -259,6 +260,7 @@ public class Window extends JFrame
 		gameInfo = new JTabbedPane();
 		gamesPanel = new JPanel();
 		gameScrollPane = new JScrollPane();
+		changeLogScrollPane = new JScrollPane(newsFeed);
 		gameList = new JList<Object>(nameList);
 		loginPanel = new JPanel();
 		register = new JButton();
@@ -353,9 +355,12 @@ public class Window extends JFrame
 				
 				wrapper = new JPanel();
 				wrapper.setLayout(new BorderLayout());
-				wrapper.add(newsFeed, BorderLayout.CENTER);
 				
 				newsFeed.setEditable(false);
+				
+				changeLogScrollPane.setViewportView(newsFeed);
+				
+				wrapper.add(changeLogScrollPane, BorderLayout.CENTER);
 				
 				try
 				{
@@ -368,10 +373,7 @@ public class Window extends JFrame
 				}
 				
 				gameInfo.addTab("Changelog", wrapper);
-				{
-					
-				}
-				
+			
 				wrapper.add(gameControlWrapper, BorderLayout.SOUTH);
 				gamesPanel.add(gameInfo, BorderLayout.CENTER);
 				
