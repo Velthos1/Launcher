@@ -362,10 +362,12 @@ public class Window extends JFrame
 									}
 
 									Download.downloadGame(downloadLink, games.get(i).getName());
+									
 									Unzip.unzip.join();
 									games.get(i).setUpdateAvailable(false);
 									isUpdateAvalaible();
 									playButton.setText("Play");
+									versionLabel.setText("Version: " + games.get(gameList.getSelectedIndex()).getVersion());
 								}
 							}
 						}
