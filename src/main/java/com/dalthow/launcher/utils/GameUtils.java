@@ -47,8 +47,6 @@ public class GameUtils
 					{
 						if (!XML.getUpdates().get(j).getVersion().trim().equalsIgnoreCase(version.trim()))
 						{
-							System.out.println(XML.getUpdates().get(j).getVersion());
-							System.out.println(version);
 							Window.games.get(i).setUpdateAvailable(true);
 							return true;
 						}
@@ -63,12 +61,11 @@ public class GameUtils
 
 	public static void launchGame(final String path, final String mainClass, final String username, final String password) throws IOException
 	{
-		game = new Thread()
+		game = new Thread(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				super.run();
 				Process proc;
 				try
 				{
@@ -92,31 +89,36 @@ public class GameUtils
 				}
 
 			}
-		};
-		game.run();
+		});
+		try
+		{
+			game.join();
+		} catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+
+		game.start();
+
 	}
 
-	public static void deleteFolder(File folder)
+	static int totalFiles;
+	static int fileCount;
+
+	public static boolean deleteDir(File file)
 	{
-		System.gc();
-		if (folder.exists())
+		if (file.isDirectory())
 		{
-			File[] files = folder.listFiles();
-			if (files != null)
+			String[] children = file.list();
+			for (int i = 0; i < children.length; i++)
 			{
-				for (File f : files)
+				boolean success = deleteDir(new File(file, children[i]));
+				if (!success)
 				{
-					if (f.isDirectory())
-					{
-						deleteFolder(f);
-					}
-					else
-					{
-						f.delete();
-					}
+					return false;
 				}
 			}
-			folder.delete();
 		}
+		return file.delete();
 	}
 }

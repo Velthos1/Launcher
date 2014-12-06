@@ -14,18 +14,19 @@ public class Unzip
 
 	public static void unpackGame(final String zipFile, final String gameName)
 	{
-		unzip = new Thread("Un-Zipper")
+		unzip = new Thread(new Runnable()
 		{
 			@Override
-			public void run()
+			public synchronized void run()
 			{
 				try
 				{
+					Window.progress.setValue(50);
 					String destinationname = Window.baseDIR + gameName + "/";
 					File file = new File(destinationname);
 					if (file.exists())
 					{
-						GameUtils.deleteFolder(file);
+						GameUtils.deleteDir(file);
 						file.mkdir();
 					}
 					byte[] buf = new byte[1024];
@@ -66,15 +67,18 @@ public class Unzip
 					}
 
 					zipinputstream.close();
+
 				} catch (Exception e)
 				{
 					e.printStackTrace();
 				}
 				System.out.println("Unzip Complete!");
+				Window.progress.setValue(100);
 			}
 
-		};
+		});
 		unzip.run();
+
 	}
 
 }

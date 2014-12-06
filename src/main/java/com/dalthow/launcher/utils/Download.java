@@ -8,18 +8,21 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
+import com.dalthow.launcher.Window;
+
 public class Download
 {
 	public static Thread download;
 
-	public static void downloadGame(final String url, final String gameName) throws MalformedURLException
+	public static synchronized void downloadGame(final String url, final String gameName) throws MalformedURLException
 	{
-		download = new Thread("Downloader")
+		download = new Thread(new Runnable()
 		{
 			@Override
-			public void run()
+			public synchronized void run()
 			{
-
+				Window.progress.setStringPainted(true);
+				Window.progress.setValue(25);
 				File downloadFolder = new File(System.getProperty("java.io.tmpdir") + "/Dalthow/");
 				try
 				{
@@ -29,10 +32,13 @@ public class Download
 					}
 					URL website = new URL(url);
 					ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+
 					FileOutputStream fos = new FileOutputStream(downloadFolder + gameName + "download.zip");
 
 					fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+
 					System.out.println("Download Complete!");
+					Window.progress.setValue(49);
 					Unzip.unpackGame(downloadFolder + gameName + "download.zip", gameName);
 					fos.close();
 				} catch (IOException e)
@@ -40,7 +46,7 @@ public class Download
 					e.printStackTrace();
 				}
 			}
-		};
-		download.run();
+		});
+		download.start();
 	}
 }

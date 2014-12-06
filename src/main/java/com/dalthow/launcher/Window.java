@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -30,6 +31,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JPopupMenu;
@@ -46,6 +48,7 @@ import org.springframework.stereotype.Component;
 
 import com.dalthow.launcher.framework.Game;
 import com.dalthow.launcher.framework.GameListRenderer;
+import com.dalthow.launcher.framework.JTextAreaOutputStream;
 import com.dalthow.launcher.utils.Download;
 import com.dalthow.launcher.utils.Encrypter;
 import com.dalthow.launcher.utils.GameUtils;
@@ -67,7 +70,7 @@ public class Window extends JFrame
 	public static String baseDIR = System.getenv("AppData") + "/Dalthow/";
 	public static String launcherDIR = baseDIR + "launcher/";
 
-	private JProgressBar progress;
+	public static JProgressBar progress;
 	private JTabbedPane tabbedPane;
 	private JPanel gamesPanel;
 	private JScrollPane gameScrollPane;
@@ -108,17 +111,20 @@ public class Window extends JFrame
 			{
 				playButton.setText("Update");
 				versionLabel.setText("Ready to update to version: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
+				uninstall.setEnabled(true);
 			}
 
 			else
 			{
 				playButton.setText("Play");
 				versionLabel.setText("Version: " + games.get(gameList.getSelectedIndex()).getVersion());
+				uninstall.setEnabled(true);
 			}
 		}
 		else
 		{
 			playButton.setText("Download");
+			uninstall.setEnabled(false);
 
 			versionLabel.setText("Ready to download: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
 		}
@@ -167,7 +173,10 @@ public class Window extends JFrame
 		try
 		{
 			XML.setUpdatesBETA();
-			XML.setUpdates.join();
+			synchronized (XML.setUpdates)
+			{
+				XML.setUpdates.join();
+			}
 		} catch (InterruptedException e)
 		{
 			e.printStackTrace();
@@ -252,10 +261,8 @@ public class Window extends JFrame
 		uninstall = new JMenuItem("uninstall");
 
 		gameList.setSelectedIndex(0);
-
 		// TODO: Enable for console
-		// System.setOut(new PrintStream(new
-		// JTextAreaOutputStream(consoleTextArea)));
+		System.setOut(new PrintStream(new JTextAreaOutputStream(consoleTextArea)));
 
 		{
 			this.setMinimumSize(new Dimension(690, 485));
@@ -301,24 +308,19 @@ public class Window extends JFrame
 						playButton.setBounds(5, 5, 120, 35);
 
 						// ---- versionLabel ----
-						if (!games.get(gameList.getSelectedIndex()).getVersion().equals("null"))
+
+						if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
 						{
 							versionLabel.setText("Version: " + games.get(gameList.getSelectedIndex()).getVersion());
 						}
 
 						else
-							if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
-							{
-								versionLabel.setText("Version: " + "Could not retieve version number");
-							}
-
-							else
-							{
-								versionLabel.setText("Ready to download to version: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
-							}
+						{
+							versionLabel.setText("Ready to download to version: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
+						}
 
 						gameControl.add(versionLabel);
-						versionLabel.setBounds(130, 30, 100, 10);
+						versionLabel.setBounds(130, 30, versionLabel.getPreferredSize().width, 10);
 
 						{
 							gameControl.setMinimumSize(new Dimension(0, 45));
@@ -406,7 +408,6 @@ public class Window extends JFrame
 					}
 					if (!username.trim().equals("") || !password.equals(""))
 					{
-						System.out.println(usingLoginFile);
 						if (!usingLoginFile)
 						{
 							Window.currentUser = username;
@@ -469,53 +470,66 @@ public class Window extends JFrame
 				@Override
 				public void actionPerformed(ActionEvent paramActionEvent)
 				{
-					try
+					new Thread(new Runnable()
 					{
-
-						for (int i = 0; i < games.size(); i++)
+						@Override
+						public void run()
 						{
-							if (gameList.getSelectedValue().equals(games.get(i).getName()))
+							try
 							{
-								String output = games.get(i).getName().substring(0, 1).toUpperCase() + games.get(i).getName().substring(1);
 
-								if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/") && !games.get(i).isUpdateAvailable())
+								for (int i = 0; i < games.size(); i++)
 								{
-									GameUtils.launchGame(output, games.get(i).getMainClass(), "MattsMc", "test");
-								}
-
-								else
-								{
-									String downloadLink = null;
-
-									for (int j = 0; j < XML.getUpdates().size(); j++)
+									if (gameList.getSelectedValue().equals(games.get(i).getName()))
 									{
-										if (games.get(i).getName().equalsIgnoreCase(XML.getUpdates().get(j).getGameName()))
+										String output = games.get(i).getName().substring(0, 1).toUpperCase() + games.get(i).getName().substring(1);
+
+										if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/") && !games.get(i).isUpdateAvailable())
 										{
-											if (XML.getUpdates().get(j).isLatest())
+											GameUtils.launchGame(output, games.get(i).getMainClass(), "MattsMc", "test");
+										}
+
+										else
+										{
+											String downloadLink = null;
+
+											for (int j = 0; j < XML.getUpdates().size(); j++)
 											{
-												System.out.println(XML.getUpdates().get(j).getGameName());
-												downloadLink = XML.getUpdates().get(j).getUpdateLink();
+												if (games.get(i).getName().equalsIgnoreCase(XML.getUpdates().get(j).getGameName()))
+												{
+													if (XML.getUpdates().get(j).isLatest())
+													{
+														downloadLink = XML.getUpdates().get(j).getUpdateLink();
+													}
+												}
 											}
+											Download.downloadGame(downloadLink, games.get(i).getName());
+											synchronized (Download.download)
+											{
+												try
+												{
+													Download.download.wait();
+													Unzip.unzip.join();
+													GameUtils.isUpdateAvalaible();
+													games.get(i).setUpdateAvailable(false);
+													updatePlayButton();
+												} catch (InterruptedException e)
+												{
+													e.printStackTrace();
+												}
+											}
+
 										}
 									}
-
-									Download.downloadGame(downloadLink, games.get(i).getName());
-									Unzip.unzip.join();
-									games.get(i).setUpdateAvailable(false);
-									updatePlayButton();
 								}
+
+							} catch (IOException e)
+							{
+								e.printStackTrace();
 							}
 						}
-
-					} catch (IOException e)
-					{
-						e.printStackTrace();
-					} catch (InterruptedException e)
-					{
-						e.printStackTrace();
-					}
+					}).start();
 				}
-
 			});
 
 			this.uninstall.addActionListener(new ActionListener()
@@ -523,8 +537,13 @@ public class Window extends JFrame
 				@Override
 				public void actionPerformed(ActionEvent e)
 				{
-					GameUtils.deleteFolder(new File(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"));
-					updatePlayButton();
+					int dialogResult = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete " + games.get(gameList.getSelectedIndex()).getName() + "?", "Warning", JOptionPane.YES_NO_OPTION);
+					if (dialogResult == JOptionPane.YES_OPTION)
+					{
+						GameUtils.deleteDir(new File(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"));
+						updatePlayButton();
+					}
+
 				}
 			});
 
@@ -533,6 +552,7 @@ public class Window extends JFrame
 				@Override
 				public void mouseClicked(MouseEvent mouseEvent)
 				{
+
 					updatePlayButton();
 				}
 			});
@@ -541,5 +561,4 @@ public class Window extends JFrame
 			this.setLocationRelativeTo(this.getOwner());
 		}
 	}
-
 }

@@ -48,15 +48,13 @@ public class XML
 	public static Thread setUpdates;
 	static int index = 0;
 
-	public static void setUpdatesBETA()
+	public synchronized static void setUpdatesBETA()
 	{
-		setUpdates = new Thread()
+		setUpdates = new Thread(new Runnable()
 		{
 			@Override
-			public void run()
+			public synchronized void run()
 			{
-				super.run();
-				System.out.println("setupdates running");
 				updates.clear();
 
 				String game;
@@ -91,11 +89,9 @@ public class XML
 										{
 
 											Element update = (Element) x;
-											System.out.println(update.getNodeName());
 											version = update.getAttribute("version");
 											branch = update.getAttribute("branch");
 											latest = Boolean.parseBoolean(update.getAttribute("latest"));
-											System.out.println(update.getAttribute("latest"));
 											requireReset = Boolean.parseBoolean(update.getAttribute("requireReset"));
 											link = null;
 											changelog = null;
@@ -130,7 +126,6 @@ public class XML
 
 												}//
 											}
-											System.out.println(index);
 											updates.put(index, new Update(game, version, branch, link, changelog, md5, latest, requireReset));
 											index++;
 										}
@@ -143,7 +138,7 @@ public class XML
 					}
 				}
 			}
-		};
+		});
 		setUpdates.run();
 	}
 
