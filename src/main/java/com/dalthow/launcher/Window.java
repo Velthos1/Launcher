@@ -180,7 +180,6 @@ public class Window extends JFrame
 	{
 
 		this.getLogin();
-		
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(width, height));
@@ -257,21 +256,20 @@ public class Window extends JFrame
 	private void getLogin() throws IOException
 	{
 		File file = new File(launcherDIR + "/profiles.txt");
-		
+
 		if(file.exists())
 		{
 			BufferedReader reader = new BufferedReader(new FileReader(file));
 			String line;
 			while((line = reader.readLine()) != null)
 			{
-				if(!line.startsWith("/"))
+				if(!line.startsWith("/") && !line.isEmpty())
 				{
 					profiles.add(new Profile(line.split(":")[0], line.split(":")[1]));
-
 				}
 			}
 			reader.close();
-			
+
 			this.populateProfileList();
 		}
 	}
@@ -642,7 +640,7 @@ public class Window extends JFrame
 					updateNewsFeed();
 				}
 			});
-			
+
 			profilesList.addMouseListener(new MouseAdapter()
 			{
 				@Override
@@ -651,7 +649,6 @@ public class Window extends JFrame
 					System.out.println(profiles.get(profilesList.getSelectedIndex()).getEncryptedPassword());
 				}
 			});
-			
 
 			pack();
 			setLocationRelativeTo(getOwner());
