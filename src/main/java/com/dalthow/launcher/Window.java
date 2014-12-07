@@ -101,6 +101,7 @@ public class Window extends JFrame
 	private JEditorPane newsFeed;
 	private JTextArea launcherConsoleTextArea;
 	private JSplitPane consoleSplit;
+	private JSplitPane gameSplit;
 
 	String[] nameList;
 
@@ -138,6 +139,11 @@ public class Window extends JFrame
 			versionLabel.setText("Ready to download: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
 		}
 
+		
+	}
+	
+	private void updateNewsFeed()
+	{
 		try
 		{
 			newsFeed.setPage(XML.getUpdates().get(gameList.getSelectedIndex()).getChangelogLink());
@@ -290,7 +296,8 @@ public class Window extends JFrame
 		launcherConsoleScroll.setViewportView(launcherConsoleTextArea);
 
 		consoleSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, gameConsoleScroll, launcherConsoleScroll);
-
+		gameSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, gameList, gameInfo);
+		
 		gameList.setSelectedIndex(0);
 		// TODO: Enable for console
 		System.setOut(new PrintStream(new JTextAreaOutputStream(this.launcherConsoleTextArea)));
@@ -317,7 +324,7 @@ public class Window extends JFrame
 
 						gameList.setComponentPopupMenu(gameRightClick);
 					}
-					gamesPanel.add(gameList, BorderLayout.WEST);
+					gamesPanel.add(this.gameSplit, BorderLayout.CENTER);
 				}
 
 				// ======== gameControlWrapper ========
@@ -368,21 +375,12 @@ public class Window extends JFrame
 
 				wrapper.add(changeLogScrollPane, BorderLayout.CENTER);
 
-				try
-				{
-					newsFeed.setPage(XML.getUpdates().get(gameList.getSelectedIndex()).getChangelogLink());
-				}
-				catch(IOException e1)
-				{
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+				updateNewsFeed();
 
 				gameInfo.addTab("Changelog", wrapper);
 
 				wrapper.add(gameControlWrapper, BorderLayout.SOUTH);
-				gamesPanel.add(gameInfo, BorderLayout.CENTER);
-
+				
 				//ep.setPage("http://" + IDN.toASCII(url));
 				tabbedPane.addTab("Games", gamesPanel);
 				{
@@ -491,10 +489,6 @@ public class Window extends JFrame
 								actionPerformed(arg0);
 							}
 						}
-					}
-					else
-					{
-
 					}
 				}
 			});
@@ -611,6 +605,7 @@ public class Window extends JFrame
 				public void mouseClicked(MouseEvent mouseEvent)
 				{
 					updatePlayButton();
+					updateNewsFeed();
 				}
 			});
 
