@@ -247,7 +247,7 @@ public class Window extends JFrame
 
 		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true))))
 		{
-			out.write("\n" + this.textField1.getText() + ":" + Encrypter.encryptString(this.passwordField1.getText()));
+			out.write("\n" + this.textField1.getText() + ":" + Encrypter.encryptString(this.passwordField1.getText())); //TODO make it so it doesn't add a new line on the first record
 		}
 		catch(IOException e)
 		{
