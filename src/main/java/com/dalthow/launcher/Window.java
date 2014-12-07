@@ -76,7 +76,6 @@ public class Window extends JFrame
 	private JTabbedPane tabbedPane;
 	private JTabbedPane gameInfo;
 	private JPanel gamesPanel;
-	private JScrollPane gameScrollPane;
 	private JScrollPane changeLogScrollPane;
 	private JList<?> gameList;
 	private JPanel loginPanel;
@@ -259,8 +258,7 @@ public class Window extends JFrame
 		tabbedPane = new JTabbedPane();
 		gameInfo = new JTabbedPane();
 		gamesPanel = new JPanel();
-		gameScrollPane = new JScrollPane();
-		changeLogScrollPane = new JScrollPane(newsFeed);
+		changeLogScrollPane = new JScrollPane();
 		gameList = new JList<Object>(nameList);
 		loginPanel = new JPanel();
 		register = new JButton();
@@ -302,16 +300,11 @@ public class Window extends JFrame
 
 						gameList.setPreferredSize(new Dimension(200, 0));
 						gameList.setCellRenderer(renderer);
-						gameScrollPane.setViewportView(gameList);
-						gameScrollPane.setWheelScrollingEnabled(true);
-
 						gameRightClick.add(uninstall);
 
 						gameList.setComponentPopupMenu(gameRightClick);
-
 					}
-					gamesPanel.add(gameScrollPane, BorderLayout.WEST);
-					gamesPanel.add(newsFeed, BorderLayout.CENTER);
+					gamesPanel.add(gameList, BorderLayout.WEST);
 				}
 
 				// ======== gameControlWrapper ========
@@ -603,7 +596,6 @@ public class Window extends JFrame
 				@Override
 				public void mouseClicked(MouseEvent mouseEvent)
 				{
-
 					updatePlayButton();
 				}
 			});
