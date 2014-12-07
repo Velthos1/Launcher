@@ -73,6 +73,8 @@ public class Window extends JFrame
 	public static String baseDIR = System.getenv("AppData") + "/Dalthow/";
 	public static String launcherDIR = baseDIR + "launcher/";
 
+	private Profile selectedProfile;
+
 	public static JProgressBar progress;
 	private JTabbedPane tabbedPane;
 	private JTabbedPane gameInfo;
@@ -443,66 +445,6 @@ public class Window extends JFrame
 				tabbedPane.addTab("Console", consolePanel);
 			}
 			LauncherContentPane.add(tabbedPane, BorderLayout.CENTER);
-
-			//			login.addActionListener(new ActionListener()
-			//			{
-			//
-			//				@Override
-			//				public void actionPerformed(ActionEvent arg0)
-			//				{
-			//					String username = usernameText.getText();
-			//					char passwordChar[] = passwordTexet.getPassword();
-			//					String password = "";
-			//					for(int i = 0; i < passwordChar.length; i++)
-			//					{
-			//						password += passwordChar[i];
-			//					}
-			//					if(!username.trim().equals("") || !password.equals(""))
-			//					{
-			//						if(!usingLoginFile)
-			//						{
-			//							Window.currentUser = username;
-			//							Window.encPassword = Encrypter.encryptString(password);
-			//
-			//							if(saveCrendentials.isSelected())
-			//							{
-			//								try
-			//								{
-			//									saveLogin();
-			//								}
-			//								catch(IOException e)
-			//								{
-			//									e.printStackTrace();
-			//								}
-			//							}
-			//							// TODO: Login
-			//						}
-			//						else
-			//						{
-			//							if(Window.currentUser.equalsIgnoreCase(username) && Window.encPassword.equalsIgnoreCase(password))
-			//							{
-			//								// TODO: Login
-			//							}
-			//							else
-			//							{
-			//								usingLoginFile = false;
-			//								actionPerformed(arg0);
-			//							}
-			//						}
-			//					}
-			//				}
-			//			});
-			//
-			//			register.addActionListener(new ActionListener()
-			//			{
-			//				@Override
-			//				public void actionPerformed(ActionEvent arg0)
-			//				{
-
-			//					}
-			//				}
-			//			});
-
 			playButton.addActionListener(new ActionListener()
 			{
 
@@ -525,7 +467,7 @@ public class Window extends JFrame
 
 										if(GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/") && !games.get(i).isUpdateAvailable())
 										{
-											//GameUtils.launchGame(output, games.get(i).getMainClass(), currentUser, encPassword);
+											GameUtils.launchGame(output, games.get(i).getMainClass(), selectedProfile.getUsername(), selectedProfile.getEncryptedPassword());
 										}
 
 										else
@@ -646,7 +588,7 @@ public class Window extends JFrame
 				@Override
 				public void mouseClicked(MouseEvent mouseEvent)
 				{
-					System.out.println(profiles.get(profilesList.getSelectedIndex()).getEncryptedPassword());
+					selectedProfile = profiles.get(profilesList.getSelectedIndex());
 				}
 			});
 
