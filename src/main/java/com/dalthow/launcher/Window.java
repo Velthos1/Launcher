@@ -21,6 +21,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -179,7 +180,7 @@ public class Window extends JFrame
 	{
 
 		this.getLogin();
-		this.populateProfileList();
+		
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(width, height));
@@ -236,21 +237,27 @@ public class Window extends JFrame
 
 	private void addRecord() throws IOException
 	{
-		File file = new File(launcherDIR + "user.properties");
+		File file = new File(launcherDIR + "profiles.txt");
 
 		if(!file.exists())
 		{
 			file.createNewFile();
 		}
 
-		BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-		writer.write(this.textField1.getText() + ":" + Encrypter.encryptString(this.passwordField1.getText()));
-		writer.close();
+		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true))))
+		{
+			out.write("\n" + this.textField1.getText() + ":" + Encrypter.encryptString(this.passwordField1.getText()));
+		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	private void getLogin() throws IOException
 	{
-		File file = new File(launcherDIR + "/user.properties");
+		File file = new File(launcherDIR + "/profiles.txt");
+		
 		if(file.exists())
 		{
 			BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -264,6 +271,8 @@ public class Window extends JFrame
 				}
 			}
 			reader.close();
+			
+			this.populateProfileList();
 		}
 	}
 
@@ -600,7 +609,7 @@ public class Window extends JFrame
 					profilesList.setModel(profileModel);
 				}
 			});
-			
+
 			registerButton.addActionListener(new ActionListener()
 			{
 
@@ -633,6 +642,16 @@ public class Window extends JFrame
 					updateNewsFeed();
 				}
 			});
+			
+			profilesList.addMouseListener(new MouseAdapter()
+			{
+				@Override
+				public void mouseClicked(MouseEvent mouseEvent)
+				{
+					System.out.println(profiles.get(profilesList.getSelectedIndex()).getEncryptedPassword());
+				}
+			});
+			
 
 			pack();
 			setLocationRelativeTo(getOwner());
