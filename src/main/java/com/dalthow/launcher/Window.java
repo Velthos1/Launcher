@@ -3,6 +3,7 @@ package com.dalthow.launcher;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -20,10 +21,12 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
@@ -49,6 +52,7 @@ import org.springframework.stereotype.Component;
 import com.dalthow.launcher.framework.Game;
 import com.dalthow.launcher.framework.GameListRenderer;
 import com.dalthow.launcher.framework.JTextAreaOutputStream;
+import com.dalthow.launcher.framework.Profile;
 import com.dalthow.launcher.utils.Download;
 import com.dalthow.launcher.utils.Encrypter;
 import com.dalthow.launcher.utils.GameUtils;
@@ -63,9 +67,7 @@ public class Window extends JFrame
 	public static LinkedList<Game> games = new LinkedList<Game>();
 	public static Map<String, ImageIcon> imageMap;
 
-	private static String currentUser;
-	private static String encPassword;
-	boolean usingLoginFile = false;
+	private LinkedList<Profile> profiles = new LinkedList<Profile>();
 
 	public static String baseDIR = System.getenv("AppData") + "/Dalthow/";
 	public static String launcherDIR = baseDIR + "launcher/";
@@ -80,6 +82,7 @@ public class Window extends JFrame
 	private JPanel consolePanel;
 	private JScrollPane gameConsoleScroll;
 	private JScrollPane launcherConsoleScroll;
+	private DefaultListModel profileModel = new DefaultListModel();
 
 	private JTextArea consoleTextArea;
 	private JPanel gameControlWrapper;
@@ -92,16 +95,16 @@ public class Window extends JFrame
 	private JTextArea launcherConsoleTextArea;
 	private JSplitPane consoleSplit;
 	private JSplitPane gameSplit;
-	private JSplitPane splitPane1;
+	private JSplitPane profileSplit;
 	private JScrollPane scrollPane1;
-	private JList<?> list1;
-	private JPanel panel1;
-	private JLabel label1;
+	private JList<?> profilesList;
+	private JPanel addProfilePanel;
+	private JLabel usernameLabel;
 	private JTextField textField1;
-	private JLabel label2;
+	private JLabel passwordLabel;
 	private JPasswordField passwordField1;
-	private JButton button1;
-	private JButton button2;
+	private JButton registerButton;
+	private JButton addProfileButton;
 
 	String[] nameList;
 
@@ -176,6 +179,7 @@ public class Window extends JFrame
 	{
 
 		this.getLogin();
+		this.populateProfileList();
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(width, height));
@@ -195,8 +199,6 @@ public class Window extends JFrame
 		{
 			FlauncherDIR.mkdir();
 		}
-
-		getLogin();
 
 		try
 		{
@@ -224,21 +226,25 @@ public class Window extends JFrame
 		setVisible(true);
 	}
 
-	private void saveLogin() throws IOException
+	private void populateProfileList()
+	{
+		for(int i = 0; i < profiles.size(); i++)
+		{
+			this.profileModel.addElement(profiles.get(i).getUsername());
+		}
+	}
+
+	private void addRecord() throws IOException
 	{
 		File file = new File(launcherDIR + "user.properties");
 
-		if(file.exists())
-		{
-			file.delete();
-		}
-		else
+		if(!file.exists())
 		{
 			file.createNewFile();
 		}
 
 		BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-		writer.write(currentUser + ":" + Encrypter.encryptString(encPassword));
+		writer.write(this.textField1.getText() + ":" + Encrypter.encryptString(this.passwordField1.getText()));
 		writer.close();
 	}
 
@@ -253,9 +259,8 @@ public class Window extends JFrame
 			{
 				if(!line.startsWith("/"))
 				{
-					currentUser = line.split(":")[0];
-					encPassword = line.split(":")[1];
-					usingLoginFile = true;
+					profiles.add(new Profile(line.split(":")[0], line.split(":")[1]));
+
 				}
 			}
 			reader.close();
@@ -285,16 +290,18 @@ public class Window extends JFrame
 		uninstall = new JMenuItem("uninstall");
 		launcherConsoleTextArea.setEditable(false);
 		launcherConsoleScroll.setViewportView(launcherConsoleTextArea);
-		splitPane1 = new JSplitPane();
+		profileSplit = new JSplitPane();
 		scrollPane1 = new JScrollPane();
-		list1 = new JList<Object>();
-		panel1 = new JPanel();
-		label1 = new JLabel();
+		profilesList = new JList<Object>();
+		addProfilePanel = new JPanel();
+		usernameLabel = new JLabel();
 		textField1 = new JTextField();
-		label2 = new JLabel();
+		passwordLabel = new JLabel();
 		passwordField1 = new JPasswordField();
-		button1 = new JButton();
-		button2 = new JButton();
+		registerButton = new JButton();
+		addProfileButton = new JButton();
+
+		profilesList.setModel(profileModel);
 
 		consoleSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, gameConsoleScroll, launcherConsoleScroll);
 		gameSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, gameList, gameInfo);
@@ -329,36 +336,35 @@ public class Window extends JFrame
 				}
 
 				{
-
 					//======== scrollPane1 ========
 					{
-						scrollPane1.setViewportView(list1);
+						scrollPane1.setViewportView(profilesList);
 					}
-					splitPane1.setLeftComponent(scrollPane1);
+					profileSplit.setLeftComponent(scrollPane1);
 
 					//======== panel1 ========
 					{
-						panel1.setLayout(new GridBagLayout());
+						addProfilePanel.setLayout(new GridBagLayout());
 
 						//---- label1 ----
-						label1.setText("Username:");
-						panel1.add(label1, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 5), 0, 0));
-						panel1.add(textField1, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 0), 0, 0));
+						usernameLabel.setText("Username:");
+						addProfilePanel.add(usernameLabel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 5), 0, 0));
+						addProfilePanel.add(textField1, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 0), 0, 0));
 
 						//---- label2 ----
-						label2.setText("Password:");
-						panel1.add(label2, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 5), 0, 0));
-						panel1.add(passwordField1, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 0), 0, 0));
+						passwordLabel.setText("Password:");
+						addProfilePanel.add(passwordLabel, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 5), 0, 0));
+						addProfilePanel.add(passwordField1, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 0), 0, 0));
 
 						//---- button1 ----
-						button1.setText("Register");
-						panel1.add(button1, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 5), 0, 0));
+						registerButton.setText("Register");
+						addProfilePanel.add(registerButton, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 5), 0, 0));
 
 						//---- button2 ----
-						button2.setText("Add Profile");
-						panel1.add(button2, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+						addProfileButton.setText("Add Profile");
+						addProfilePanel.add(addProfileButton, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 					}
-					splitPane1.setRightComponent(panel1);
+					profileSplit.setRightComponent(addProfilePanel);
 				}
 
 				// ======== gameControlWrapper ========
@@ -421,13 +427,12 @@ public class Window extends JFrame
 				}
 				consolePanel.setLayout(new BorderLayout());
 				{
-
 					consoleTextArea.setFocusable(false);
 					gameConsoleScroll.setViewportView(consoleTextArea);
 					consolePanel.add(consoleSplit, BorderLayout.CENTER);
 				}
 
-				tabbedPane.addTab("Login", splitPane1);
+				tabbedPane.addTab("Profiles", profileSplit);
 				tabbedPane.addTab("Console", consolePanel);
 			}
 			LauncherContentPane.add(tabbedPane, BorderLayout.CENTER);
@@ -486,18 +491,7 @@ public class Window extends JFrame
 			//				@Override
 			//				public void actionPerformed(ActionEvent arg0)
 			//				{
-			//					Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-			//					if(desktop != null && desktop.isSupported(Desktop.Action.BROWSE))
-			//					{
-			//						try
-			//						{
-			//							System.out.println("Opening Registration Website");
-			//							desktop.browse(new URL("http://dalthow.com/registration.php").toURI());
-			//						}
-			//						catch(Exception e)
-			//						{
-			//							e.printStackTrace();
-			//						}
+
 			//					}
 			//				}
 			//			});
@@ -524,7 +518,7 @@ public class Window extends JFrame
 
 										if(GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/") && !games.get(i).isUpdateAvailable())
 										{
-											GameUtils.launchGame(output, games.get(i).getMainClass(), currentUser, encPassword);
+											//GameUtils.launchGame(output, games.get(i).getMainClass(), currentUser, encPassword);
 										}
 
 										else
@@ -585,6 +579,49 @@ public class Window extends JFrame
 					}
 
 				}
+			});
+
+			addProfileButton.addActionListener(new ActionListener()
+			{
+				@Override
+				public void actionPerformed(ActionEvent e)
+				{
+					profiles.add(new Profile(textField1.getText(), Encrypter.encryptString(passwordField1.getText())));
+					profileModel.addElement(textField1.getText());
+					try
+					{
+						addRecord();
+					}
+					catch(IOException e1)
+					{
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					profilesList.setModel(profileModel);
+				}
+			});
+			
+			registerButton.addActionListener(new ActionListener()
+			{
+
+				@Override
+				public void actionPerformed(ActionEvent e)
+				{
+					Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+					if(desktop != null && desktop.isSupported(Desktop.Action.BROWSE))
+					{
+						try
+						{
+							System.out.println("Opening Registration Website");
+							desktop.browse(new URL("http://dalthow.com/registration.php").toURI());
+						}
+						catch(Exception e1)
+						{
+							e1.printStackTrace();
+						}
+					}
+				}
+
 			});
 
 			gameList.addMouseListener(new MouseAdapter()
