@@ -12,7 +12,7 @@ public class GameListRenderer extends DefaultListCellRenderer
 {
 	private static final long serialVersionUID = 3417936567129777819L;
 
-	Font font = new Font("helvitica", Font.BOLD, 24);
+	Font font = new Font("Arial", Font.BOLD, 24);
 
 	@Override
 	public java.awt.Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus)

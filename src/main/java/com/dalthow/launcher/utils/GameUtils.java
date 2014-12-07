@@ -70,7 +70,7 @@ public class GameUtils
 				Process proc;
 				try
 				{
-					proc = Runtime.getRuntime().exec("java -cp " + mainClass + " -Djava.library.path=" + Window.baseDIR + path + "/target/natives -jar " + System.getenv("AppData") + "/Dalthow/" + path + "/game.jar -username=\"" + username + "\" -password=\"" + Encrypter.encryptString(password) + "\"");
+					proc = Runtime.getRuntime().exec("java -cp " + mainClass + " -Djava.library.path=" + Window.baseDIR + path + "/target/natives -jar " + System.getenv("AppData") + "/Dalthow/" + path + "/game.jar -username=\"" + username + "\" -password=\"" + password + "\"");
 
 					InputStream in = proc.getInputStream();
 					InputStream err = proc.getErrorStream();
@@ -105,23 +105,25 @@ public class GameUtils
 
 	}
 
-	static int totalFiles;
-	static int fileCount;
-
 	public static boolean deleteDir(File file)
 	{
+		String[] children = null;
+		
 		if(file.isDirectory())
 		{
-			String[] children = file.list();
+			children = file.list();
+		
 			for(int i = 0; i < children.length; i++)
 			{
 				boolean success = deleteDir(new File(file, children[i]));
+				
 				if(!success)
 				{
 					return false;
 				}
 			}
 		}
+		
 		return file.delete();
 	}
 }
