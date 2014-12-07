@@ -17,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -108,6 +109,8 @@ public class Window extends JFrame
 	private JPasswordField passwordField1;
 	private JButton registerButton;
 	private JButton addProfileButton;
+	private JMenuItem removeProfile;
+	private JPopupMenu rightClickProfile;
 
 	String[] nameList;
 
@@ -155,7 +158,6 @@ public class Window extends JFrame
 		}
 		catch(IOException e1)
 		{
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 	}
@@ -180,8 +182,6 @@ public class Window extends JFrame
 	@Autowired
 	public Window(@Value("${launcher.width}") int width, @Value("${launcher.height}") int height, @Value("${launcher.title}") String title, @Value("${launcher.version}") String version) throws IOException
 	{
-
-		this.getLogin();
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(width, height));
@@ -222,7 +222,15 @@ public class Window extends JFrame
 		imageMap = createImageMap(nameList);
 
 		initComponents();
+
+		getLogin();
 		addGamesToList();
+
+		if(profiles.isEmpty() == false)
+		{
+			this.profilesList.setSelectedIndex(0);
+			this.selectedProfile = profiles.get(profilesList.getSelectedIndex());
+		}
 
 		pack();
 		setVisible(true);
@@ -230,6 +238,9 @@ public class Window extends JFrame
 
 	private void populateProfileList()
 	{
+
+		rightClickProfile.add(removeProfile);
+		profilesList.setComponentPopupMenu(rightClickProfile);
 		for(int i = 0; i < profiles.size(); i++)
 		{
 			this.profileModel.addElement(profiles.get(i).getUsername());
@@ -245,14 +256,10 @@ public class Window extends JFrame
 			file.createNewFile();
 		}
 
-		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true))))
-		{
-			out.write("\n" + this.textField1.getText() + ":" + Encrypter.encryptString(this.passwordField1.getText())); //TODO make it so it doesn't add a new line on the first record
-		}
-		catch(IOException e)
-		{
-			e.printStackTrace();
-		}
+		BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
+		writer.write(this.textField1.getText() + ":" + Encrypter.encryptString(this.passwordField1.getText()));
+		writer.newLine();
+		writer.close();
 	}
 
 	private void getLogin() throws IOException
@@ -309,19 +316,21 @@ public class Window extends JFrame
 		passwordField1 = new JPasswordField();
 		registerButton = new JButton();
 		addProfileButton = new JButton();
+		removeProfile = new JMenuItem("Remove Profile");
+		rightClickProfile = new JPopupMenu();
 
 		profilesList.setModel(profileModel);
 
+		profilesList.setPreferredSize(new Dimension(200, 0));
 		consoleSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, gameConsoleScroll, launcherConsoleScroll);
 		gameSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, gameList, gameInfo);
 
 		gameList.setSelectedIndex(0);
 		// TODO: Enable for console
 		System.setOut(new PrintStream(new JTextAreaOutputStream(this.launcherConsoleTextArea)));
-
 		{
 			setMinimumSize(new Dimension(690, 485));
-			setResizable(false);//TODO decide XD
+			setResizable(false);// TODO decide XD
 			Container LauncherContentPane = getContentPane();
 			LauncherContentPane.setLayout(new BorderLayout());
 			LauncherContentPane.add(progress, BorderLayout.SOUTH);
@@ -345,31 +354,31 @@ public class Window extends JFrame
 				}
 
 				{
-					//======== scrollPane1 ========
+					// ======== scrollPane1 ========
 					{
 						scrollPane1.setViewportView(profilesList);
 					}
 					profileSplit.setLeftComponent(scrollPane1);
 
-					//======== panel1 ========
+					// ======== panel1 ========
 					{
 						addProfilePanel.setLayout(new GridBagLayout());
 
-						//---- label1 ----
+						// ---- label1 ----
 						usernameLabel.setText("Username:");
 						addProfilePanel.add(usernameLabel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 5), 0, 0));
 						addProfilePanel.add(textField1, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 0), 0, 0));
 
-						//---- label2 ----
+						// ---- label2 ----
 						passwordLabel.setText("Password:");
 						addProfilePanel.add(passwordLabel, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 5), 0, 0));
 						addProfilePanel.add(passwordField1, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 0), 0, 0));
 
-						//---- button1 ----
+						// ---- button1 ----
 						registerButton.setText("Register");
 						addProfilePanel.add(registerButton, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 5), 0, 0));
 
-						//---- button2 ----
+						// ---- button2 ----
 						addProfileButton.setText("Add Profile");
 						addProfilePanel.add(addProfileButton, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 					}
@@ -431,9 +440,7 @@ public class Window extends JFrame
 				wrapper.add(gameControlWrapper, BorderLayout.SOUTH);
 
 				tabbedPane.addTab("Games", gamesPanel);
-				{
-					loginPanel.setLayout(null);
-				}
+
 				consolePanel.setLayout(new BorderLayout());
 				{
 					consoleTextArea.setFocusable(false);
@@ -442,9 +449,30 @@ public class Window extends JFrame
 				}
 
 				tabbedPane.addTab("Profiles", profileSplit);
+
 				tabbedPane.addTab("Console", consolePanel);
 			}
 			LauncherContentPane.add(tabbedPane, BorderLayout.CENTER);
+
+			removeProfile.addActionListener(new ActionListener()
+			{
+
+				@Override
+				public void actionPerformed(ActionEvent e)
+				{
+					try
+					{
+						removeProfile();
+					}
+					catch(IOException e1)
+					{
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+
+			});
+
 			playButton.addActionListener(new ActionListener()
 			{
 
@@ -594,6 +622,69 @@ public class Window extends JFrame
 
 			pack();
 			setLocationRelativeTo(getOwner());
+		}
+	}
+
+	public void removeProfile() throws IOException
+	{
+		profiles.remove(profilesList.getSelectedIndex());
+		profileModel.remove(profilesList.getSelectedIndex());
+		profilesList.setModel(profileModel);
+
+		removeLineFromFile(launcherDIR + "/profiles.txt", selectedProfile.getUsername() + ":" + selectedProfile.getEncryptedPassword());
+	}
+
+	public void removeLineFromFile(String file, String lineToRemove)
+	{
+
+		try
+		{
+
+			File inFile = new File(file);
+
+			if(!inFile.isFile())
+			{
+				System.out.println("Parameter is not an existing file");
+				return;
+			}
+
+			File tempFile = new File(inFile.getAbsolutePath() + ".tmp");
+
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			PrintWriter pw = new PrintWriter(new FileWriter(tempFile));
+
+			String line = null;
+
+			while((line = br.readLine()) != null)
+			{
+
+				if(!line.trim().equals(lineToRemove))
+				{
+
+					pw.println(line);
+					pw.flush();
+				}
+			}
+			pw.close();
+			br.close();
+
+			if(!inFile.delete())
+			{
+				System.out.println("Could not delete file");
+				return;
+			}
+
+			if(!tempFile.renameTo(inFile))
+				System.out.println("Could not rename file");
+
+		}
+		catch(FileNotFoundException ex)
+		{
+			ex.printStackTrace();
+		}
+		catch(IOException ex)
+		{
+			ex.printStackTrace();
 		}
 	}
 }
