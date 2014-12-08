@@ -50,9 +50,9 @@ public class GameUtils
 				reader.close();
 				for (int j = 0; j < XML.getUpdates().size(); j++)
 				{
-					if (XML.getUpdates().get(j).getGameName().equalsIgnoreCase(Window.games.get(i).getName()) && XML.getUpdates().get(i).isLatest())
+					if (XML.getUpdates().get(j).getGameName().equalsIgnoreCase(Window.games.get(i).getName()) && !XML.getUpdates().get(j).getVersion().trim().equalsIgnoreCase(version.trim()))
 					{
-						if (!XML.getUpdates().get(j).getVersion().trim().equalsIgnoreCase(version.trim()))
+						if (XML.getUpdates().get(i).isLatest())
 						{
 							Window.games.get(i).setUpdateAvailable(true);
 							return true;
@@ -121,8 +121,7 @@ public class GameUtils
 				}
 			}
 		});
-			game.start();
-	
+		game.start();
 
 	}
 

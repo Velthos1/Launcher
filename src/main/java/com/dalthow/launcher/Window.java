@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -30,6 +31,7 @@ import java.util.Map;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -86,6 +88,7 @@ public class Window extends JFrame
 	private JScrollPane launcherConsoleScroll;
 	private DefaultListModel profileModel = new DefaultListModel();
 
+	private JComboBox versions;
 	public static JTextArea consoleTextArea;
 	private JPanel gameControlWrapper;
 	private JPanel gameControl;
@@ -124,6 +127,14 @@ public class Window extends JFrame
 	{
 		if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
 		{
+			// if
+			// (!versions.getItemAt(versions.getSelectedIndex()).toString().split(" ")[1].equalsIgnoreCase(games.get(gameList.getSelectedIndex()).getVersion()))
+			// {
+			// playButton.setText("Update");
+			// versionLabel.setText("Ready to update to version: " +
+			// versions.getItemAt(versions.getSelectedIndex()).toString());
+			// uninstall.setEnabled(true);
+			// }
 			if (games.get(gameList.getSelectedIndex()).isUpdateAvailable())
 			{
 				playButton.setText("Update");
@@ -279,6 +290,24 @@ public class Window extends JFrame
 		}
 	}
 
+	public void updateVersion()
+	{
+		for (int j = 0; j < versions.getItemCount(); j++)
+		{
+			versions.removeItemAt(j);
+		}
+		int count = 0;
+		String[] versionsList = new String[XML.getUpdates().size()];
+		for (int i = 0; i < XML.getUpdates().size(); i++)
+		{
+			if (XML.getUpdates().get(i).getGameName().equalsIgnoreCase(games.get(gameList.getSelectedIndex()).getName()) && !XML.getUpdates().get(i).getBranch().equalsIgnoreCase("stable"))
+			{
+				versions.addItem(XML.getUpdates().get(i).getBranch() + " " + XML.getUpdates().get(i).getVersion());
+				count++;
+			}
+		}
+	}
+
 	private void initComponents()
 	{
 		newsFeed = new JEditorPane();
@@ -322,6 +351,9 @@ public class Window extends JFrame
 		gameSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, gameList, gameInfo);
 
 		gameList.setSelectedIndex(0);
+		versions = new JComboBox();
+
+		updateVersion();
 
 		// TODO: Enable for console
 		System.setOut(new PrintStream(new JTextAreaOutputStream(this.launcherConsoleTextArea)));
@@ -344,10 +376,10 @@ public class Window extends JFrame
 						gameList.setPreferredSize(new Dimension(200, 0));
 						gameList.setCellRenderer(renderer);
 						gameRightClick.add(uninstall);
-
 						gameList.setComponentPopupMenu(gameRightClick);
 					}
 					gamesPanel.add(this.gameSplit, BorderLayout.CENTER);
+					gamesPanel.add(versions, BorderLayout.NORTH);
 				}
 
 				{
@@ -416,6 +448,7 @@ public class Window extends JFrame
 							gameControl.setPreferredSize(new Dimension(0, 45));
 						}
 					}
+
 					gameControlWrapper.add(gameControl, BorderLayout.SOUTH);
 				}
 
@@ -626,6 +659,7 @@ public class Window extends JFrame
 				{
 					updatePlayButton();
 					updateNewsFeed();
+					updateVersion();
 				}
 			});
 
