@@ -320,7 +320,7 @@ public class Window extends JFrame
 		rightClickProfile = new JPopupMenu();
 
 		profilesList.setModel(profileModel);
-
+		progress.setStringPainted(true);
 		profilesList.setPreferredSize(new Dimension(200, 0));
 		consoleSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, gameConsoleScroll, launcherConsoleScroll);
 		gameSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, gameList, gameInfo);
@@ -513,6 +513,8 @@ public class Window extends JFrame
 												}
 											}
 											Download.downloadGame(downloadLink, games.get(i).getName());
+											GameUtils.isUpdateAvalaible();
+											games.get(i).setUpdateAvailable(false);
 											updatePlayButton();
 										}
 									}
@@ -560,7 +562,7 @@ public class Window extends JFrame
 						e1.printStackTrace();
 					}
 					profilesList.setModel(profileModel);
-				
+
 					profilesList.setSelectedIndex(profileModel.size() - 1);
 				}
 			});
