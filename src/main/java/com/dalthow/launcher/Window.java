@@ -58,7 +58,6 @@ import com.dalthow.launcher.framework.Profile;
 import com.dalthow.launcher.utils.Download;
 import com.dalthow.launcher.utils.Encrypter;
 import com.dalthow.launcher.utils.GameUtils;
-import com.dalthow.launcher.utils.Unzip;
 import com.dalthow.launcher.utils.XML;
 
 @Component
@@ -564,6 +563,7 @@ public class Window extends JFrame
 					profilesList.setModel(profileModel);
 
 					profilesList.setSelectedIndex(profileModel.size() - 1);
+					selectedProfile = profiles.get(profileModel.size() - 1);
 				}
 			});
 
