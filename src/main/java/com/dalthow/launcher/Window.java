@@ -1,4 +1,3 @@
-
 package com.dalthow.launcher;
 
 import java.awt.BorderLayout;
@@ -87,15 +86,15 @@ public class Window extends JFrame
 	private JScrollPane launcherConsoleScroll;
 	private DefaultListModel profileModel = new DefaultListModel();
 
-	private JTextArea consoleTextArea;
+	public static JTextArea consoleTextArea;
 	private JPanel gameControlWrapper;
 	private JPanel gameControl;
-	private JButton playButton;
+	public static JButton playButton;
 	private JLabel versionLabel;
 	private JMenuItem uninstall;
 	private JPopupMenu gameRightClick;
 	private JEditorPane newsFeed;
-	private JTextArea launcherConsoleTextArea;
+	public static JTextArea launcherConsoleTextArea;
 	private JSplitPane consoleSplit;
 	private JSplitPane gameSplit;
 	private JSplitPane profileSplit;
@@ -115,7 +114,7 @@ public class Window extends JFrame
 
 	private void addGamesToList()
 	{
-		for(int i = 0; i < games.size(); i++)
+		for (int i = 0; i < games.size(); i++)
 		{
 			nameList[i] = games.get(i).getName();
 		}
@@ -123,9 +122,9 @@ public class Window extends JFrame
 
 	public void updatePlayButton()
 	{
-		if(GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
+		if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
 		{
-			if(games.get(gameList.getSelectedIndex()).isUpdateAvailable())
+			if (games.get(gameList.getSelectedIndex()).isUpdateAvailable())
 			{
 				playButton.setText("Update");
 				versionLabel.setText("Ready to update to version: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
@@ -154,8 +153,7 @@ public class Window extends JFrame
 		try
 		{
 			newsFeed.setPage(XML.getUpdates().get(gameList.getSelectedIndex()).getChangelogLink());
-		}
-		catch(IOException e1)
+		} catch (IOException e1)
 		{
 			e1.printStackTrace();
 		}
@@ -166,12 +164,11 @@ public class Window extends JFrame
 		Map<String, ImageIcon> map = new HashMap<>();
 		try
 		{
-			for(int i = 0; i < games.size(); i++)
+			for (int i = 0; i < games.size(); i++)
 			{
 				map.put(games.get(i).getName(), games.get(i).getImage());
 			}
-		}
-		catch(Exception ex)
+		} catch (Exception ex)
 		{
 			ex.printStackTrace();
 		}
@@ -190,13 +187,13 @@ public class Window extends JFrame
 		setIconImage(icon);
 
 		File FbaseDIR = new File(baseDIR);
-		if(!FbaseDIR.exists())
+		if (!FbaseDIR.exists())
 		{
 			FbaseDIR.mkdirs();
 		}
 
 		File FlauncherDIR = new File(launcherDIR);
-		if(!FlauncherDIR.exists())
+		if (!FlauncherDIR.exists())
 		{
 			FlauncherDIR.mkdir();
 		}
@@ -204,12 +201,11 @@ public class Window extends JFrame
 		try
 		{
 			XML.setUpdatesBETA();
-			synchronized(XML.setUpdates)
+			synchronized (XML.setUpdates)
 			{
 				XML.setUpdates.join();
 			}
-		}
-		catch(InterruptedException e)
+		} catch (InterruptedException e)
 		{
 			e.printStackTrace();
 		}
@@ -225,7 +221,7 @@ public class Window extends JFrame
 		getLogin();
 		addGamesToList();
 
-		if(profiles.isEmpty() == false)
+		if (profiles.isEmpty() == false)
 		{
 			this.profilesList.setSelectedIndex(0);
 			this.selectedProfile = profiles.get(profilesList.getSelectedIndex());
@@ -240,7 +236,8 @@ public class Window extends JFrame
 
 		rightClickProfile.add(removeProfile);
 		profilesList.setComponentPopupMenu(rightClickProfile);
-		for(int i = 0; i < profiles.size(); i++)
+
+		for (int i = 0; i < profiles.size(); i++)
 		{
 			this.profileModel.addElement(profiles.get(i).getUsername());
 		}
@@ -250,7 +247,7 @@ public class Window extends JFrame
 	{
 		File file = new File(launcherDIR + "profiles.txt");
 
-		if(!file.exists())
+		if (!file.exists())
 		{
 			file.createNewFile();
 		}
@@ -265,13 +262,13 @@ public class Window extends JFrame
 	{
 		File file = new File(launcherDIR + "/profiles.txt");
 
-		if(file.exists())
+		if (file.exists())
 		{
 			BufferedReader reader = new BufferedReader(new FileReader(file));
 			String line;
-			while((line = reader.readLine()) != null)
+			while ((line = reader.readLine()) != null)
 			{
-				if(!line.startsWith("/") && !line.isEmpty())
+				if (!line.startsWith("/") && !line.isEmpty())
 				{
 					profiles.add(new Profile(line.split(":")[0], line.split(":")[1]));
 				}
@@ -325,6 +322,7 @@ public class Window extends JFrame
 		gameSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, gameList, gameInfo);
 
 		gameList.setSelectedIndex(0);
+
 		// TODO: Enable for console
 		System.setOut(new PrintStream(new JTextAreaOutputStream(this.launcherConsoleTextArea)));
 		{
@@ -400,7 +398,7 @@ public class Window extends JFrame
 
 						// ---- versionLabel ----
 
-						if(GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
+						if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
 						{
 							versionLabel.setText("Version: " + games.get(gameList.getSelectedIndex()).getVersion());
 						}
@@ -462,10 +460,9 @@ public class Window extends JFrame
 					try
 					{
 						removeProfile();
-					}
-					catch(IOException e1)
+
+					} catch (IOException e1)
 					{
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 				}
@@ -486,26 +483,34 @@ public class Window extends JFrame
 							try
 							{
 
-								for(int i = 0; i < games.size(); i++)
+								for (int i = 0; i < games.size(); i++)
 								{
-									if(gameList.getSelectedValue().equals(games.get(i).getName()))
+									if (gameList.getSelectedValue().equals(games.get(i).getName()))
 									{
 										String output = games.get(i).getName().substring(0, 1).toUpperCase() + games.get(i).getName().substring(1);
 
-										if(GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/") && !games.get(i).isUpdateAvailable())
+										if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/") && !games.get(i).isUpdateAvailable())
 										{
-											GameUtils.launchGame(output, games.get(i).getMainClass(), selectedProfile.getUsername(), selectedProfile.getEncryptedPassword());
+											if (!profiles.isEmpty())
+											{
+												GameUtils.launchGame(output, games.get(i).getMainClass(), selectedProfile.getUsername(), selectedProfile.getEncryptedPassword());
+											}
+											else
+											{
+												JOptionPane.showMessageDialog(null, "You don't have a profile created.", "Warning", JOptionPane.WARNING_MESSAGE);
+												tabbedPane.setSelectedIndex(1);
+											}
 										}
 
 										else
 										{
 											String downloadLink = null;
 
-											for(int j = 0; j < XML.getUpdates().size(); j++)
+											for (int j = 0; j < XML.getUpdates().size(); j++)
 											{
-												if(games.get(i).getName().equalsIgnoreCase(XML.getUpdates().get(j).getGameName()))
+												if (games.get(i).getName().equalsIgnoreCase(XML.getUpdates().get(j).getGameName()))
 												{
-													if(XML.getUpdates().get(j).isLatest())
+													if (XML.getUpdates().get(j).isLatest())
 													{
 														downloadLink = XML.getUpdates().get(j).getUpdateLink();
 													}
@@ -519,8 +524,7 @@ public class Window extends JFrame
 									}
 								}
 
-							}
-							catch(IOException e)
+							} catch (IOException e)
 							{
 								e.printStackTrace();
 							}
@@ -535,7 +539,7 @@ public class Window extends JFrame
 				public void actionPerformed(ActionEvent e)
 				{
 					int dialogResult = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete " + games.get(gameList.getSelectedIndex()).getName() + "?", "Warning", JOptionPane.YES_NO_OPTION);
-					if(dialogResult == JOptionPane.YES_OPTION)
+					if (dialogResult == JOptionPane.YES_OPTION)
 					{
 						GameUtils.deleteDir(new File(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"));
 						updatePlayButton();
@@ -549,21 +553,47 @@ public class Window extends JFrame
 				@Override
 				public void actionPerformed(ActionEvent e)
 				{
-					profiles.add(new Profile(textField1.getText(), Encrypter.encryptString(passwordField1.getText())));
-					profileModel.addElement(textField1.getText());
-					try
-					{
-						addRecord();
-					}
-					catch(IOException e1)
-					{
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					profilesList.setModel(profileModel);
+					boolean existant = false;
 
-					profilesList.setSelectedIndex(profileModel.size() - 1);
-					selectedProfile = profiles.get(profileModel.size() - 1);
+					if (!profiles.isEmpty())
+					{
+						for (int j = 0; j < profiles.size(); j++)
+						{
+							if (profiles.get(j).getUsername().equalsIgnoreCase(textField1.getText()))
+							{
+								existant = true;
+								break;
+							}
+						}
+					}
+					if (!existant)
+					{
+						if (!textField1.getText().equalsIgnoreCase("") && !passwordField1.getText().equalsIgnoreCase(""))
+						{
+							profiles.add(new Profile(textField1.getText(), Encrypter.encryptString(passwordField1.getText())));
+							profileModel.addElement(textField1.getText());
+
+							try
+							{
+								addRecord();
+							}
+
+							catch (IOException e1)
+							{
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+
+							profilesList.setModel(profileModel);
+
+							profilesList.setSelectedIndex(profileModel.size() - 1);
+							selectedProfile = profiles.get(profileModel.size() - 1);
+						}
+					}
+					else
+					{
+						JOptionPane.showMessageDialog(null, "There is already a username called " + textField1.getText() + ", remove that one before creating a new one.", "Warning", JOptionPane.WARNING_MESSAGE);
+					}
 				}
 			});
 
@@ -574,14 +604,13 @@ public class Window extends JFrame
 				public void actionPerformed(ActionEvent e)
 				{
 					Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-					if(desktop != null && desktop.isSupported(Desktop.Action.BROWSE))
+					if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE))
 					{
 						try
 						{
 							System.out.println("Opening Registration Website");
 							desktop.browse(new URL("http://dalthow.com/registration.php").toURI());
-						}
-						catch(Exception e1)
+						} catch (Exception e1)
 						{
 							e1.printStackTrace();
 						}
@@ -605,7 +634,10 @@ public class Window extends JFrame
 				@Override
 				public void mouseClicked(MouseEvent mouseEvent)
 				{
-					selectedProfile = profiles.get(profilesList.getSelectedIndex());
+					if (!profiles.isEmpty())
+					{
+						selectedProfile = profiles.get(profilesList.getSelectedIndex());
+					}
 				}
 			});
 
@@ -616,11 +648,14 @@ public class Window extends JFrame
 
 	public void removeProfile() throws IOException
 	{
-		profiles.remove(profilesList.getSelectedIndex());
-		profileModel.remove(profilesList.getSelectedIndex());
-		profilesList.setModel(profileModel);
-
-		removeLineFromFile(launcherDIR + "/profiles.txt", selectedProfile.getUsername() + ":" + selectedProfile.getEncryptedPassword());
+		if (!profilesList.isSelectionEmpty())
+		{
+			profiles.remove(profilesList.getSelectedIndex());
+			profileModel.remove(profilesList.getSelectedIndex());
+			profilesList.setModel(profileModel);
+			removeLineFromFile(launcherDIR + "/profiles.txt", selectedProfile.getUsername() + ":" + selectedProfile.getEncryptedPassword());
+			profilesList.setSelectedIndex(0);
+		}
 	}
 
 	public void removeLineFromFile(String file, String lineToRemove)
@@ -631,7 +666,7 @@ public class Window extends JFrame
 
 			File inFile = new File(file);
 
-			if(!inFile.isFile())
+			if (!inFile.isFile())
 			{
 				System.out.println("Parameter is not an existing file");
 				return;
@@ -644,10 +679,10 @@ public class Window extends JFrame
 
 			String line = null;
 
-			while((line = br.readLine()) != null)
+			while ((line = br.readLine()) != null)
 			{
 
-				if(!line.trim().equals(lineToRemove))
+				if (!line.trim().equals(lineToRemove))
 				{
 
 					pw.println(line);
@@ -657,21 +692,19 @@ public class Window extends JFrame
 			pw.close();
 			br.close();
 
-			if(!inFile.delete())
+			if (!inFile.delete())
 			{
 				System.out.println("Could not delete file");
 				return;
 			}
 
-			if(!tempFile.renameTo(inFile))
+			if (!tempFile.renameTo(inFile))
 				System.out.println("Could not rename file");
 
-		}
-		catch(FileNotFoundException ex)
+		} catch (FileNotFoundException ex)
 		{
 			ex.printStackTrace();
-		}
-		catch(IOException ex)
+		} catch (IOException ex)
 		{
 			ex.printStackTrace();
 		}

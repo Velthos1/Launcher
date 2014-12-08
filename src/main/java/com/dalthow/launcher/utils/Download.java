@@ -1,4 +1,3 @@
-
 package com.dalthow.launcher.utils;
 
 import java.io.File;
@@ -14,6 +13,8 @@ public class Download
 
 	public static void downloadGame(final String url, final String gameName) throws IOException
 	{
+		System.out.println("Downloading " + gameName);
+		Window.playButton.setEnabled(false);
 		HTTPDownloadUtil util = new HTTPDownloadUtil();
 		util.downloadFile(url);
 
@@ -29,15 +30,17 @@ public class Download
 		int percentCompleted = 0;
 		long fileSize = util.getContentLength();
 
-		while((bytesRead = inputStream.read(buffer)) != -1)
+		while ((bytesRead = inputStream.read(buffer)) != -1)
 		{
 			outputStream.write(buffer, 0, bytesRead);
 			totalBytesRead += bytesRead;
 			percentCompleted = (int) (totalBytesRead * 100 / fileSize);
 
 			Window.progress.setValue(percentCompleted);
+			Window.progress.setToolTipText("Downloading...");
 		}
-		
+
+		System.out.println("Download Complete!");
 		Unzip.unpackGame(saveFilePath, gameName);
 
 		outputStream.close();
