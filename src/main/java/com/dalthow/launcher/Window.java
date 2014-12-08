@@ -303,7 +303,7 @@ public class Window extends JFrame
 		playButton = new JButton();
 		versionLabel = new JLabel();
 		gameRightClick = new JPopupMenu();
-		uninstall = new JMenuItem("uninstall");
+		uninstall = new JMenuItem("Uninstall");
 		launcherConsoleTextArea.setEditable(false);
 		launcherConsoleScroll.setViewportView(launcherConsoleTextArea);
 		profileSplit = new JSplitPane();
@@ -316,7 +316,7 @@ public class Window extends JFrame
 		passwordField1 = new JPasswordField();
 		registerButton = new JButton();
 		addProfileButton = new JButton();
-		removeProfile = new JMenuItem("Remove Profile");
+		removeProfile = new JMenuItem("Delete");
 		rightClickProfile = new JPopupMenu();
 
 		profilesList.setModel(profileModel);
@@ -330,7 +330,7 @@ public class Window extends JFrame
 		System.setOut(new PrintStream(new JTextAreaOutputStream(this.launcherConsoleTextArea)));
 		{
 			setMinimumSize(new Dimension(690, 485));
-			setResizable(false);// TODO decide XD
+			setResizable(true);// TODO decide XD
 			Container LauncherContentPane = getContentPane();
 			LauncherContentPane.setLayout(new BorderLayout());
 			LauncherContentPane.add(progress, BorderLayout.SOUTH);
@@ -575,6 +575,8 @@ public class Window extends JFrame
 						e1.printStackTrace();
 					}
 					profilesList.setModel(profileModel);
+				
+					profilesList.setSelectedIndex(profileModel.size() - 1);
 				}
 			});
 

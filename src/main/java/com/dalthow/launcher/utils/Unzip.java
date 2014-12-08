@@ -21,7 +21,6 @@ public class Unzip
 			{
 				try
 				{
-					Window.progress.setValue(50);
 					String destinationname = Window.baseDIR + gameName + "/";
 					File file = new File(destinationname);
 					if (file.exists())
@@ -40,7 +39,7 @@ public class Unzip
 						String entryName = destinationname + zipentry.getName();
 						entryName = entryName.replace('/', File.separatorChar);
 						entryName = entryName.replace('\\', File.separatorChar);
-						int n;
+					
 						FileOutputStream fileoutputstream;
 						File newFile = new File(entryName);
 						if (zipentry.isDirectory())
@@ -55,9 +54,20 @@ public class Unzip
 
 						fileoutputstream = new FileOutputStream(entryName);
 
-						while ((n = zipinputstream.read(buf, 0, 1024)) > -1)
+				            int bytesRead = -1;
+				            long totalBytesRead = 0;
+				            int percentCompleted = 0;
+				            long fileSize = zipentry.getSize();
+				            
+						
+						while ((bytesRead = zipinputstream.read(buf, 0, 1024)) > -1)
 						{
-							fileoutputstream.write(buf, 0, n);
+							fileoutputstream.write(buf, 0, bytesRead);
+							
+							 totalBytesRead += bytesRead;
+							 percentCompleted = (int) (totalBytesRead * 100 / fileSize);
+					            
+				             Window.progress.setValue(percentCompleted);    //TODO also apply this method to the download. It works but goes multiple times, dunno why.
 						}
 
 						fileoutputstream.close();
@@ -73,7 +83,6 @@ public class Unzip
 					e.printStackTrace();
 				}
 				System.out.println("Unzip Complete!");
-				Window.progress.setValue(100);
 			}
 
 		});
