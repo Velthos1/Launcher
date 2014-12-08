@@ -513,22 +513,7 @@ public class Window extends JFrame
 												}
 											}
 											Download.downloadGame(downloadLink, games.get(i).getName());
-											synchronized(Download.download)
-											{
-												try
-												{
-													Download.download.wait();
-													Unzip.unzip.join();
-													GameUtils.isUpdateAvalaible();
-													games.get(i).setUpdateAvailable(false);
-													updatePlayButton();
-												}
-												catch(InterruptedException e)
-												{
-													e.printStackTrace();
-												}
-											}
-
+											updatePlayButton();
 										}
 									}
 								}
