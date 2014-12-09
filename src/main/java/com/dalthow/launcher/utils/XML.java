@@ -126,6 +126,7 @@ public class XML
 
 												}//
 											}
+											System.out.println(game + " " + version);
 											updates.put(index, new Update(game, version, branch, link, changelog, md5, latest, requireReset));
 											index++;
 										}

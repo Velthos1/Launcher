@@ -57,6 +57,10 @@ public class GameUtils
 							Window.games.get(i).setUpdateAvailable(true);
 							return true;
 						}
+						else
+						{
+							continue;
+						}
 					}
 				}
 			}

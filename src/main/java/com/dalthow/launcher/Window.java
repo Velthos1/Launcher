@@ -87,7 +87,7 @@ public class Window extends JFrame
 	private JScrollPane launcherConsoleScroll;
 	private DefaultListModel profileModel = new DefaultListModel();
 
-	private JComboBox versions;
+	// private JComboBox versions;
 	public static JTextArea consoleTextArea;
 	private JPanel gameControlWrapper;
 	private JPanel gameControl;
@@ -281,26 +281,20 @@ public class Window extends JFrame
 		}
 	}
 
-	public void updateVersion()
-	{
-		for (int j = 0; j < versions.getItemCount(); j++)
-		{
-			versions.removeItemAt(j);
-		}
-		versions.addItem("Latest");
-		int count = 0;
-		String[] versionsList = new String[XML.getUpdates().size()];
-		for (int i = 0; i < XML.getUpdates().size(); i++)
-		{
-			if (XML.getUpdates().get(i).getGameName().equalsIgnoreCase(games.get(gameList.getSelectedIndex()).getName()) && !XML.getUpdates().get(i).getBranch().equalsIgnoreCase("stable"))
-			{
-				versions.addItem(games.get(gameList.getSelectedIndex()).getName());
-				// Game game = (Game) versions.getSelectedItem();
-
-				count++;
-			}
-		}
-	}
+	// public void updateVersion()
+	// {
+	// versions.removeAllItems();
+	//
+	// for (int i = 0; i < XML.getUpdates().size(); i++)
+	// {
+	// if
+	// (XML.getUpdates().get(i).getGameName().equalsIgnoreCase(games.get(gameList.getSelectedIndex()).getName()))
+	// {
+	// versions.addItem(games.get(gameList.getSelectedIndex()).getName() + " " +
+	// games.get(gameList.getSelectedIndex()).getVersion());
+	// }
+	// }
+	// }
 
 	private void initComponents()
 	{
@@ -345,9 +339,9 @@ public class Window extends JFrame
 		gameSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, gameList, gameInfo);
 
 		gameList.setSelectedIndex(0);
-		versions = new JComboBox();
+		// versions = new JComboBox();
 
-		updateVersion();
+		// updateVersion();
 
 		// TODO: Enable for console
 		System.setOut(new PrintStream(new JTextAreaOutputStream(this.launcherConsoleTextArea)));
@@ -373,7 +367,7 @@ public class Window extends JFrame
 						gameList.setComponentPopupMenu(gameRightClick);
 					}
 					gamesPanel.add(this.gameSplit, BorderLayout.CENTER);
-					gamesPanel.add(versions, BorderLayout.NORTH);
+					// gamesPanel.add(versions, BorderLayout.NORTH);
 				}
 
 				{
@@ -426,16 +420,30 @@ public class Window extends JFrame
 
 						if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
 						{
-							versionLabel.setText("Version: " + games.get(gameList.getSelectedIndex()).getVersion());
-						}
+							if (games.get(gameList.getSelectedIndex()).isUpdateAvailable())
+							{
+								playButton.setText("Update");
+								versionLabel.setText("Ready to update to version: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
+								uninstall.setEnabled(true);
+							}
 
+							else
+							{
+								playButton.setText("Play");
+								versionLabel.setText("Version: " + games.get(gameList.getSelectedIndex()).getVersion());
+								uninstall.setEnabled(true);
+							}
+						}
 						else
 						{
-							versionLabel.setText("Ready to download to version: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
+							playButton.setText("Download");
+							uninstall.setEnabled(false);
+
+							versionLabel.setText("Ready to download: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
 						}
 
 						gameControl.add(versionLabel);
-						versionLabel.setBounds(130, 30, versionLabel.getPreferredSize().width, 10);
+						versionLabel.setBounds(130, 30, 300, 10);
 
 						{
 							gameControl.setMinimumSize(new Dimension(0, 45));
@@ -510,44 +518,45 @@ public class Window extends JFrame
 							try
 							{
 
-								for (int i = 0; i < games.size(); i++)
+								if (gameList.getSelectedValue().equals(games.get(gameList.getSelectedIndex()).getName()))
 								{
-									if (gameList.getSelectedValue().equals(games.get(i).getName()))
+									String output = games.get(gameList.getSelectedIndex()).getName().substring(0, 1).toUpperCase() + games.get(gameList.getSelectedIndex()).getName().substring(1);
+
+									if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/") && !games.get(gameList.getSelectedIndex()).isUpdateAvailable())
 									{
-										String output = games.get(i).getName().substring(0, 1).toUpperCase() + games.get(i).getName().substring(1);
-
-										if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/") && !games.get(i).isUpdateAvailable())
+										if (!profiles.isEmpty())
 										{
-											if (!profiles.isEmpty())
-											{
-												GameUtils.launchGame(output, games.get(i).getMainClass(), selectedProfile.getUsername(), selectedProfile.getEncryptedPassword());
-											}
-											else
-											{
-												JOptionPane.showMessageDialog(null, "You don't have a profile created.", "Warning", JOptionPane.WARNING_MESSAGE);
-												tabbedPane.setSelectedIndex(1);
-											}
+											GameUtils.launchGame(output, games.get(gameList.getSelectedIndex()).getMainClass(), selectedProfile.getUsername(), selectedProfile.getEncryptedPassword());
 										}
-
 										else
 										{
-											String downloadLink = null;
+											JOptionPane.showMessageDialog(null, "You don't have a profile created.", "Warning", JOptionPane.WARNING_MESSAGE);
+											tabbedPane.setSelectedIndex(1);
+										}
+									}
 
-											for (int j = 0; j < XML.getUpdates().size(); j++)
+									else
+									{
+										String downloadLink = null;
+
+										for (int j = 0; j < XML.getUpdates().size(); j++)
+										{
+											if (games.get(gameList.getSelectedIndex()).getName().equalsIgnoreCase(XML.getUpdates().get(j).getGameName()))
 											{
-												if (games.get(i).getName().equalsIgnoreCase(XML.getUpdates().get(j).getGameName()))
+												if (XML.getUpdates().get(j).isLatest())
 												{
-													if (XML.getUpdates().get(j).isLatest())
-													{
-														downloadLink = XML.getUpdates().get(j).getUpdateLink();
-													}
+													downloadLink = XML.getUpdates().get(j).getUpdateLink();
+												}
+												else
+												{
+													continue;
 												}
 											}
-											Download.downloadGame(downloadLink, games.get(i).getName());
-											GameUtils.isUpdateAvalaible();
-											games.get(i).setUpdateAvailable(false);
-											updatePlayButton();
 										}
+										Download.downloadGame(downloadLink, games.get(gameList.getSelectedIndex()).getName());
+										GameUtils.isUpdateAvalaible();
+										games.get(gameList.getSelectedIndex()).setUpdateAvailable(false);
+										updatePlayButton();
 									}
 								}
 
@@ -651,9 +660,9 @@ public class Window extends JFrame
 				@Override
 				public void mouseClicked(MouseEvent mouseEvent)
 				{
+					// updateVersion();
 					updatePlayButton();
 					updateNewsFeed();
-					updateVersion();
 				}
 			});
 
