@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -127,14 +126,6 @@ public class Window extends JFrame
 	{
 		if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
 		{
-			// if
-			// (!versions.getItemAt(versions.getSelectedIndex()).toString().split(" ")[1].equalsIgnoreCase(games.get(gameList.getSelectedIndex()).getVersion()))
-			// {
-			// playButton.setText("Update");
-			// versionLabel.setText("Ready to update to version: " +
-			// versions.getItemAt(versions.getSelectedIndex()).toString());
-			// uninstall.setEnabled(true);
-			// }
 			if (games.get(gameList.getSelectedIndex()).isUpdateAvailable())
 			{
 				playButton.setText("Update");
@@ -296,13 +287,16 @@ public class Window extends JFrame
 		{
 			versions.removeItemAt(j);
 		}
+		versions.addItem("Latest");
 		int count = 0;
 		String[] versionsList = new String[XML.getUpdates().size()];
 		for (int i = 0; i < XML.getUpdates().size(); i++)
 		{
 			if (XML.getUpdates().get(i).getGameName().equalsIgnoreCase(games.get(gameList.getSelectedIndex()).getName()) && !XML.getUpdates().get(i).getBranch().equalsIgnoreCase("stable"))
 			{
-				versions.addItem(XML.getUpdates().get(i).getBranch() + " " + XML.getUpdates().get(i).getVersion());
+				versions.addItem(games.get(gameList.getSelectedIndex()).getName());
+				// Game game = (Game) versions.getSelectedItem();
+
 				count++;
 			}
 		}
