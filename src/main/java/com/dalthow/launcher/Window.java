@@ -162,7 +162,7 @@ public class Window extends JFrame
 	{
 		try
 		{
-			newsFeed.setPage(XML.getUpdates().get(gameList.getSelectedIndex()).getChangelogLink());
+			newsFeed.setPage(games.get(gameList.getSelectedIndex()).getChangeLog());
 		}
 		catch(IOException e1)
 		{

@@ -12,6 +12,8 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import javax.swing.JOptionPane;
+
 import com.dalthow.launcher.Window;
 
 public class Download
@@ -51,6 +53,11 @@ public class Download
 			if(getMD5Checksum(saveFilePath).matches(XML.getUpdates().get(Window.gameList.getSelectedIndex()).getMD5()))
 			{
 				Unzip.unpackGame(saveFilePath, gameName);
+			}
+			
+			else
+			{
+				JOptionPane.showMessageDialog(null, "The file you downloaded is corrupt, try downloading it again.", "Warning", JOptionPane.WARNING_MESSAGE);
 			}
 		}
 		

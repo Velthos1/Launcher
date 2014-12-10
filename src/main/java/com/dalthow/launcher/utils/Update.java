@@ -6,16 +6,14 @@ public class Update {
 	private String version;
 	private String branch;
 	private String updateLink;
-	private String changelogLink;
 	private String md5;
 	private String game;
 	
-	public Update(String game, String version, String branch, String updateLink, String changelogLink, String md5, boolean latest, boolean resetRequired){
+	public Update(String game, String version, String branch, String updateLink, String md5, boolean latest, boolean resetRequired){
 		this.game=game;
 		this.version=version;
 		this.branch=branch;
 		this.updateLink=updateLink;
-		this.changelogLink=changelogLink;
 		this.md5=md5;
 		this.latest=latest;
 		this.resetRequired=resetRequired;
@@ -54,12 +52,6 @@ public class Update {
 	}
 	public void setUpdateLink(String updateLink) {
 		this.updateLink = updateLink;
-	}
-	public String getChangelogLink() {
-		return changelogLink;
-	}
-	public void setChangelogLink(String changelogLink) {
-		this.changelogLink = changelogLink;
 	}
 	public void setMD5(String md5){
 		this.md5=md5;

@@ -1,3 +1,4 @@
+
 package com.dalthow.launcher.framework;
 
 import javax.swing.ImageIcon;
@@ -9,15 +10,17 @@ public class Game
 	private ImageIcon image;
 	private String mainClass;
 	private String downloadLink;
+	private String changeLog;
 	private boolean updateAvailable;
 
-	public Game(String name, String mainClass, String version, String downloadLink, ImageIcon image, boolean updateAvailable)
+	public Game(String name, String mainClass, String version, String downloadLink, ImageIcon image, String changeLog, boolean updateAvailable)
 	{
 		this.name = name;
 		this.version = version;
 		this.downloadLink = downloadLink;
 		this.image = image;
 		this.mainClass = mainClass;
+		this.setChangeLog(changeLog);
 		this.setUpdateAvailable(updateAvailable);
 	}
 
@@ -79,5 +82,15 @@ public class Game
 	public void setUpdateAvailable(boolean updateAvailable)
 	{
 		this.updateAvailable = updateAvailable;
+	}
+
+	public String getChangeLog()
+	{
+		return changeLog;
+	}
+
+	public void setChangeLog(String changeLog)
+	{
+		this.changeLog = changeLog;
 	}
 }

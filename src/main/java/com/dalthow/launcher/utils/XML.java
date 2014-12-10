@@ -113,10 +113,7 @@ public class XML
 														{
 															link = nc.getTextContent().trim();
 														}
-														if (nc.getNodeType() == Node.ELEMENT_NODE && nc.getNodeName().equals("changelog"))
-														{
-															changelog = nc.getTextContent().trim();
-														}
+														
 														if (nc.getNodeType() == Node.ELEMENT_NODE && nc.getNodeName().equals("md5"))
 														{
 															md5 = nc.getTextContent().trim();
@@ -127,7 +124,7 @@ public class XML
 												}//
 											}
 											
-											updates.put(index, new Update(game, version, branch, link, changelog, md5, latest, requireReset));
+											updates.put(index, new Update(game, version, branch, link, md5, latest, requireReset));
 											index++;
 										}
 
@@ -154,6 +151,7 @@ public class XML
 				Element items = (Element) n;
 
 				String gameName = items.getAttribute("gameName");
+				String changelog = items.getAttribute("changelog");
 				String mainClass = items.getAttribute("mainClass");
 
 				String imageURL = null;
@@ -165,6 +163,11 @@ public class XML
 					if (nc.getNodeType() == Node.ELEMENT_NODE && nc.getNodeName().equals("img"))
 					{
 						imageURL = nc.getTextContent().trim();
+					}
+					
+					if (nc.getNodeType() == Node.ELEMENT_NODE && nc.getNodeName().equals("changelog"))
+					{
+						changelog = nc.getTextContent().trim();
 					}
 				}
 
@@ -181,9 +184,11 @@ public class XML
 								{
 									downloadLink = getUpdates().get(z).getUpdateLink();
 								}
+								
+								
 							}
 						}
-						Window.games.add(new Game(gameName, mainClass, null, downloadLink, new ImageIcon(new URL(imageURL)), false));
+						Window.games.add(new Game(gameName, mainClass, null, downloadLink, new ImageIcon(new URL(imageURL)), changelog, false));
 					}
 				} catch (MalformedURLException e)
 				{
