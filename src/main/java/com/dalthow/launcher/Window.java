@@ -156,8 +156,6 @@ public class Window extends JFrame
 				}
 			}
 		}
-		
-		gameSplit.resetToPreferredSizes();
 	}
 
 	private void updateNewsFeed()
@@ -247,7 +245,6 @@ public class Window extends JFrame
 
 	private void populateProfileList()
 	{
-
 		rightClickProfile.add(removeProfile);
 		profilesList.setComponentPopupMenu(rightClickProfile);
 
@@ -424,7 +421,7 @@ public class Window extends JFrame
 					gameControl.add(versionLabel, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.SOUTH, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 
 					this.updatePlayButton();
-					
+
 					gameControlWrapper.add(gameControl, BorderLayout.SOUTH);
 				}
 
@@ -554,8 +551,9 @@ public class Window extends JFrame
 					if(dialogResult == JOptionPane.YES_OPTION)
 					{
 						GameUtils.deleteDir(new File(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"));
-						
+
 						updatePlayButton();
+						gameSplit.resetToPreferredSizes();
 					}
 
 				}
