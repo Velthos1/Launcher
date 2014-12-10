@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -82,7 +83,7 @@ public class Window extends JFrame
 	private JTabbedPane gameInfo;
 	private JPanel gamesPanel;
 	private JScrollPane changeLogScrollPane;
-	private JList<?> gameList;
+	public static JList<?> gameList;
 	private JPanel loginPanel;
 	private JPanel consolePanel;
 	private JScrollPane gameConsoleScroll;
@@ -535,7 +536,7 @@ public class Window extends JFrame
 								}
 
 							}
-							catch(IOException e)
+							catch(IOException | NoSuchAlgorithmException e)
 							{
 								e.printStackTrace();
 							}
