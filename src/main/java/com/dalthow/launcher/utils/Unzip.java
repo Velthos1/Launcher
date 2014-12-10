@@ -1,3 +1,4 @@
+
 package com.dalthow.launcher.utils;
 
 import java.io.File;
@@ -6,11 +7,16 @@ import java.io.FileOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import com.dalthow.launcher.Window;
 
 public class Unzip
 {
-	public static Thread unzip;
+	// Declaration
+
+	private static final Logger logger = LogManager.getLogger(Unzip.class);
 
 	public static void unpackGame(final String zipFile, final String gameName)
 	{
@@ -19,7 +25,7 @@ public class Unzip
 			System.out.println("Unzipping " + gameName);
 			String destinationname = Window.baseDIR + gameName + "/";
 			File file = new File(destinationname);
-			if (file.exists())
+			if(file.exists())
 			{
 				GameUtils.deleteDir(file);
 				file.mkdir();
@@ -30,7 +36,7 @@ public class Unzip
 			zipinputstream = new ZipInputStream(new FileInputStream(zipFile));
 
 			zipentry = zipinputstream.getNextEntry();
-			while (zipentry != null)
+			while(zipentry != null)
 			{
 				String entryName = destinationname + zipentry.getName();
 				entryName = entryName.replace('/', File.separatorChar);
@@ -38,9 +44,9 @@ public class Unzip
 
 				FileOutputStream fileoutputstream;
 				File newFile = new File(entryName);
-				if (zipentry.isDirectory())
+				if(zipentry.isDirectory())
 				{
-					if (!newFile.mkdirs())
+					if(!newFile.mkdirs())
 					{
 						break;
 					}
@@ -56,7 +62,7 @@ public class Unzip
 				long fileSize = zipentry.getSize();
 
 				System.out.println("Unzipping: " + zipentry.getName());
-				while ((bytesRead = zipinputstream.read(buf, 0, 1024)) > -1)
+				while((bytesRead = zipinputstream.read(buf, 0, 1024)) > -1)
 				{
 					fileoutputstream.write(buf, 0, bytesRead);
 
@@ -77,7 +83,8 @@ public class Unzip
 			zipinputstream.close();
 			Window.playButton.setEnabled(true);
 			Window.progress.setToolTipText("Done!");
-		} catch (Exception e)
+		}
+		catch(Exception e)
 		{
 			e.printStackTrace();
 		}
