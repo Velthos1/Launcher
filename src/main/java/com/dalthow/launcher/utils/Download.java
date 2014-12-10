@@ -9,11 +9,9 @@ import com.dalthow.launcher.Window;
 
 public class Download
 {
-	public static Thread download;
-
-	public static void downloadGame(final String url, final String gameName) throws IOException
+	public static void downloadGame(final String url, final String gameName, final String version) throws IOException
 	{
-		System.out.println("Downloading " + gameName);
+		System.out.println("Downloading " + gameName + " " + version);
 		Window.playButton.setEnabled(false);
 		HTTPDownloadUtil util = new HTTPDownloadUtil();
 		util.downloadFile(url);

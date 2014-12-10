@@ -124,7 +124,7 @@ public class Window extends JFrame
 
 	public void updatePlayButton()
 	{
-		if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
+		if(GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
 		{
 			if (games.get(gameList.getSelectedIndex()).isUpdateAvailable())
 			{
@@ -140,14 +140,20 @@ public class Window extends JFrame
 				uninstall.setEnabled(true);
 			}
 		}
+		
 		else
 		{
 			playButton.setText("Download");
 			uninstall.setEnabled(false);
 
-			versionLabel.setText("Ready to download: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
+			for(int i = 0; i < XML.getUpdates().size(); i++)
+			{
+				if(XML.getUpdates().get(i).isLatest())
+				{
+					versionLabel.setText("Ready to download: " + XML.getUpdates().get(i).getVersion());
+				}
+			}
 		}
-
 	}
 
 	private void updateNewsFeed()
@@ -281,21 +287,6 @@ public class Window extends JFrame
 		}
 	}
 
-	// public void updateVersion()
-	// {
-	// versions.removeAllItems();
-	//
-	// for (int i = 0; i < XML.getUpdates().size(); i++)
-	// {
-	// if
-	// (XML.getUpdates().get(i).getGameName().equalsIgnoreCase(games.get(gameList.getSelectedIndex()).getName()))
-	// {
-	// versions.addItem(games.get(gameList.getSelectedIndex()).getName() + " " +
-	// games.get(gameList.getSelectedIndex()).getVersion());
-	// }
-	// }
-	// }
-
 	private void initComponents()
 	{
 		newsFeed = new JEditorPane();
@@ -418,29 +409,8 @@ public class Window extends JFrame
 
 						// ---- versionLabel ----
 
-						if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
-						{
-							if (games.get(gameList.getSelectedIndex()).isUpdateAvailable())
-							{
-								playButton.setText("Update");
-								versionLabel.setText("Ready to update to version: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
-								uninstall.setEnabled(true);
-							}
-
-							else
-							{
-								playButton.setText("Play");
-								versionLabel.setText("Version: " + games.get(gameList.getSelectedIndex()).getVersion());
-								uninstall.setEnabled(true);
-							}
-						}
-						else
-						{
-							playButton.setText("Download");
-							uninstall.setEnabled(false);
-
-							versionLabel.setText("Ready to download: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
-						}
+						this.updatePlayButton();
+						
 
 						gameControl.add(versionLabel);
 						versionLabel.setBounds(130, 30, 300, 10);
@@ -553,7 +523,7 @@ public class Window extends JFrame
 												}
 											}
 										}
-										Download.downloadGame(downloadLink, games.get(gameList.getSelectedIndex()).getName());
+										Download.downloadGame(downloadLink, games.get(gameList.getSelectedIndex()).getName(), games.get(gameList.getSelectedIndex()).getVersion());
 										GameUtils.isUpdateAvalaible();
 										games.get(gameList.getSelectedIndex()).setUpdateAvailable(false);
 										updatePlayButton();
