@@ -89,7 +89,6 @@ public class Window extends JFrame
 	private JScrollPane launcherConsoleScroll;
 	private DefaultListModel profileModel = new DefaultListModel();
 
-	// private JComboBox versions;
 	public static JTextArea consoleTextArea;
 	private JPanel gameControlWrapper;
 	private JPanel gameControl;
@@ -156,6 +155,8 @@ public class Window extends JFrame
 				}
 			}
 		}
+		
+		gameSplit.resetToPreferredSizes();
 	}
 
 	private void updateNewsFeed()
@@ -553,6 +554,7 @@ public class Window extends JFrame
 					if(dialogResult == JOptionPane.YES_OPTION)
 					{
 						GameUtils.deleteDir(new File(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"));
+						
 						updatePlayButton();
 					}
 
