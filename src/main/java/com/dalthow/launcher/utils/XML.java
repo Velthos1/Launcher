@@ -126,7 +126,7 @@ public class XML
 												}
 											}
 										
-											Window.mods.add(new Modifications(name, target, button, help));
+											Window.mods.add(new Modifications(game, name, target, button, help));
 										}
 										
 										if (x.getNodeName() == "update")

@@ -7,12 +7,15 @@ public class Modifications
 	private String button;
 	private String help;
 	
-	public Modifications(String name, String target, String button, String help)
+	private String game;
+	
+	public Modifications(String game, String name, String target, String button, String help)
 	{
 		this.target = target;
 		this.name = name;
 		this.button = button;
 		this.help = help;
+		this.setGame(game);
 	}
 
 	public String getTarget()
@@ -53,5 +56,15 @@ public class Modifications
 	public void setHelp(String help)
 	{
 		this.help = help;
+	}
+
+	public String getGame()
+	{
+		return game;
+	}
+
+	public void setGame(String game)
+	{
+		this.game = game;
 	}
 }

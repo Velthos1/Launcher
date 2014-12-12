@@ -646,8 +646,8 @@ public class Window extends JFrame
 				{
 					// updateVersion();
 					updatePlayButton();
-					updateNewsFeed();
 					updateMods();
+					updateNewsFeed();
 				}
 			});
 
@@ -671,71 +671,76 @@ public class Window extends JFrame
 	private void updateMods()
 	{
 		modifications.removeAll();
-		
+		modifications.updateUI();
 		for(int i = 0; i < mods.size(); i++)
 		{
-			final Modifications mod = mods.get(i);
-			JLabel label1 = new JLabel();
-			label1.setText(mod.getName() + ":");
-			modifications.add(label1, new GridBagConstraints(0, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 10, 10), 0, 0));
-
-			JButton button1 = new JButton();
-			button1.setText(mod.getButton());
-			modifications.add(button1, new GridBagConstraints(1, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 10, 5), 0, 0));
-
-			JButton button2 = new JButton();
-			button2.setText("Help");
-			modifications.add(button2, new GridBagConstraints(2, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 10, 0), 0, 0));
-
-			button1.addActionListener(new ActionListener()
+			if(mods.get(i).getGame().equalsIgnoreCase(games.get(gameList.getSelectedIndex()).getName()))
 			{
-				@Override
-				public void actionPerformed(ActionEvent e)
-				{
-					Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+				final Modifications mod = mods.get(i);
+				JLabel label1 = new JLabel();
+				label1.setText(mod.getName() + ":");
+				modifications.add(label1, new GridBagConstraints(0, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 10, 10), 0, 0));
 
-					if(desktop != null && desktop.isSupported(Desktop.Action.OPEN))
+				JButton button1 = new JButton();
+				button1.setText(mod.getButton());
+				modifications.add(button1, new GridBagConstraints(1, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 10, 5), 0, 0));
+
+				JButton button2 = new JButton();
+				button2.setText("Help");
+				modifications.add(button2, new GridBagConstraints(2, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 10, 0), 0, 0));
+
+				button1.addActionListener(new ActionListener()
+				{
+					@Override
+					public void actionPerformed(ActionEvent e)
 					{
-						try
+						Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+
+						if(desktop != null && desktop.isSupported(Desktop.Action.OPEN))
 						{
-							if(GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
+							try
 							{
-								String appData = System.getenv("APPDATA");
-								File target = new File(appData + "/Dalthow/" + games.get(gameList.getSelectedIndex()).getName() + mod.getTarget());
-								desktop.open(new File(target.getAbsolutePath()));
+								if(GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
+								{
+									String appData = System.getenv("APPDATA");
+									File target = new File(appData + "/Dalthow/" + games.get(gameList.getSelectedIndex()).getName() + mod.getTarget());
+									desktop.open(new File(target.getAbsolutePath()));
+								}
+							}
+							catch(Exception e1)
+							{
+								e1.printStackTrace();
 							}
 						}
-						catch(Exception e1)
-						{
-							e1.printStackTrace();
-						}
+
 					}
-				}
-			});
-			
+				});
 
-			button2.addActionListener(new ActionListener(){
-
-				@Override
-				public void actionPerformed(ActionEvent e)
+				button2.addActionListener(new ActionListener()
 				{
-					Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
 
-					if(desktop != null && desktop.isSupported(Desktop.Action.BROWSE))
+					@Override
+					public void actionPerformed(ActionEvent e)
 					{
-						try
+						Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+
+						if(desktop != null && desktop.isSupported(Desktop.Action.BROWSE))
 						{
-							desktop.browse(new URL(mod.getHelp()).toURI());
-						}
-						catch(IOException | URISyntaxException e1)
-						{
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
+							try
+							{
+								desktop.browse(new URL(mod.getHelp()).toURI());
+							}
+							catch(IOException | URISyntaxException e1)
+							{
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
 						}
 					}
-				}
-				
-			});
+
+				});
+			}
+
 		}
 	}
 
