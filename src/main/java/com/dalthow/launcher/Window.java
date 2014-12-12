@@ -218,8 +218,6 @@ public class Window extends JFrame
 			{
 				XML.setUpdates.join();
 			}
-
-			XML.setGameMods();
 		}
 		catch(InterruptedException e)
 		{
@@ -444,17 +442,7 @@ public class Window extends JFrame
 
 				modifications.setLayout(new GridBagLayout());
 
-				for(int i = 0; i < mods.size(); i++)
-				{
-					JLabel label1 = new JLabel();
-					label1.setText(mods.get(i).getName() + ":");
-					modifications.add(label1, new GridBagConstraints(0, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 10, 5), 0, 0));
-
-					//---- button1 ----
-					JButton button1 = new JButton();
-					button1.setText(mods.get(i).getButton());
-					modifications.add(button1, new GridBagConstraints(1, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 10, 0), 0, 0));
-				}
+				updateMods();
 
 				gameInfo.addTab("Changelog", wrapper);
 				gameInfo.addTab("Modifications", modifications);
@@ -675,6 +663,47 @@ public class Window extends JFrame
 
 			pack();
 			setLocationRelativeTo(getOwner());
+		}
+	}
+
+	private void updateMods()
+	{
+		for(int i = 0; i < mods.size(); i++)
+		{
+			final Modifications mod = mods.get(i);
+			JLabel label1 = new JLabel();
+			label1.setText(mod.getName() + ":");
+			modifications.add(label1, new GridBagConstraints(0, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 10, 5), 0, 0));
+
+			JButton button1 = new JButton();
+			button1.setText(mod.getButton());
+			modifications.add(button1, new GridBagConstraints(1, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 10, 0), 0, 0));
+
+			button1.addActionListener(new ActionListener()
+			{
+				@Override
+				public void actionPerformed(ActionEvent e)
+				{
+					Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+
+					if(desktop != null && desktop.isSupported(Desktop.Action.OPEN))
+					{
+						try
+						{
+							if(GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
+							{
+								String appData = System.getenv("APPDATA");
+								File target = new File(appData + "/Dalthow/" + games.get(gameList.getSelectedIndex()).getName() + mod.getTarget());
+								desktop.open(new File(target.getAbsolutePath()));
+							}
+						}
+						catch(Exception e1)
+						{
+							e1.printStackTrace();
+						}
+					}
+				}
+			});
 		}
 	}
 

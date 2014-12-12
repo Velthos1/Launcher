@@ -86,6 +86,49 @@ public class XML
 									Node x = u.item(z);
 									if (x.getNodeType() == Node.ELEMENT_NODE)
 									{
+										if(x.getNodeName() == "modification")
+										{
+											Element modification = (Element) x;
+											
+											String name = modification.getAttribute("name");
+											String target = null;
+											String button = null;
+											String help = null;
+											
+											NodeList updatelist = x.getChildNodes();
+
+											for (int i = 0; i < updatelist.getLength(); i++)
+											{
+												Node n = updatelist.item(i);
+												if (n.getNodeType() == Node.ELEMENT_NODE)
+												{
+													NodeList nl = modification.getChildNodes();
+
+													for (int b = 0; b < nl.getLength(); b++)
+													{
+														Node nc = nl.item(b);
+													
+														if (nc.getNodeType() == Node.ELEMENT_NODE && nc.getNodeName().equals("target"))
+														{
+															target = nc.getTextContent().trim();
+														}
+														
+														if (nc.getNodeType() == Node.ELEMENT_NODE && nc.getNodeName().equals("button"))
+														{
+															button = nc.getTextContent().trim();
+														}
+														
+														if (nc.getNodeType() == Node.ELEMENT_NODE && nc.getNodeName().equals("help"))
+														{
+															help = nc.getTextContent().trim();
+														}
+													}
+												}
+											}
+										
+											Window.mods.add(new Modifications(name, target, button, help));
+										}
+										
 										if (x.getNodeName() == "update")
 										{
 
@@ -195,36 +238,6 @@ public class XML
 
 				}
 			}
-		}
-	}
-	
-	public static void setGameMods()
-	{
-		NodeList launcher = doc.getElementsByTagName("mod");
-		for(int i = 0; i < launcher.getLength(); i++)
-		{
-			Node node = launcher.item(i);
-			
-			String name = null;
-			String target = null;
-			String button = null;
-			
-			for(int j = 0; j < node.getAttributes().getLength(); j++)
-			{
-				if(node.getAttributes().item(j).getNodeName().equals("target"))
-				{
-					target = node.getAttributes().item(j).getNodeValue();
-				}
-				
-				if(node.getAttributes().item(j).getNodeName().equals("button"))
-				{
-					button = node.getAttributes().item(j).getNodeValue();
-				}
-			}
-
-			name = node.getChildNodes().item(0).getNodeValue();
-			
-			Window.mods.add(new Modifications(name, target, button));
 		}
 	}
 }
