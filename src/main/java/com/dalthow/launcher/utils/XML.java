@@ -173,14 +173,12 @@ public class XML
 																	jarMd5 = nc.getChildNodes().item(k).getTextContent().trim();
 																}
 															}
-															
-															System.out.println(zipMd5+ " : " + jarMd5);
 														}
 													}
 												}//
 											}
 											
-											updates.put(index, new Update(game, version, branch, link, zipMd5, latest, requireReset));
+											updates.put(index, new Update(game, version, branch, link, zipMd5, jarMd5, latest, requireReset));
 											index++;
 										}
 

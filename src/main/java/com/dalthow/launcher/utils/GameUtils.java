@@ -1,15 +1,15 @@
+
 package com.dalthow.launcher.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.util.Scanner;
+import java.security.MessageDigest;
 
 import javax.swing.JOptionPane;
 
@@ -21,7 +21,7 @@ public class GameUtils
 	public static boolean isGameInstalled(String dir)
 	{
 		File file = new File(dir);
-		if (file.exists())
+		if(file.exists())
 		{
 			return true;
 		}
@@ -48,13 +48,16 @@ public class GameUtils
 					}
 				}
 				reader.close();
+
 				for (int j = 0; j < XML.getUpdates().size(); j++)
 				{
-					if (XML.getUpdates().get(j).getGameName().equalsIgnoreCase(Window.games.get(i).getName()) && !XML.getUpdates().get(j).getVersion().trim().equalsIgnoreCase(version.trim()))
+					if (XML.getUpdates().get(j).getGameName().equalsIgnoreCase(Window.games.get(i).getName()) && !version.matches(XML.getUpdates().get(i).getVersion()))
 					{
 						if (XML.getUpdates().get(i).isLatest())
 						{
+
 							Window.games.get(i).setUpdateAvailable(true);
+
 							return true;
 						}
 						else
@@ -65,6 +68,7 @@ public class GameUtils
 				}
 			}
 		}
+
 		return false;
 	}
 
@@ -77,7 +81,7 @@ public class GameUtils
 			@Override
 			public void run()
 			{
-				String command = "javaw -cp " + mainClass + " -Djava.library.path=" + Window.baseDIR + path + "/target/natives -jar " + System.getenv("AppData") + "/Dalthow/" + path + "/game.jar -username=\"" + username + "\" -password=\"" + password + "\"";
+				String command = "javaw -cp " + mainClass + " -Djava.library.path=" + Window.baseDIR + path + "/game_lib -jar " + System.getenv("AppData") + "/Dalthow/" + path + "/game.jar -username=\"" + username + "\" -password=\"" + password + "\"";
 				Process p;
 				try
 				{
@@ -125,8 +129,24 @@ public class GameUtils
 				}
 			}
 		});
-		game.start();
-
+		try
+		{
+			if(getMD5Checksum(System.getenv("AppData") + "/Dalthow/" + path + "/game.jar").matches(XML.getUpdates().get(Window.gameList.getSelectedIndex()).getJarMd5()))
+			{
+				game.start();
+			}
+			
+			else
+			{
+				JOptionPane.showMessageDialog(null, "The game you are trying to run is corrupt, try reinstalling it.", "Warning", JOptionPane.WARNING_MESSAGE);
+				
+			}
+		}
+		catch(Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public static boolean deleteDir(File file)
@@ -151,5 +171,46 @@ public class GameUtils
 		boolean deleted = file.delete();
 
 		return deleted;
+	}
+	
+	public static byte[] createChecksum(String filename) throws Exception
+	{
+		InputStream fis = new FileInputStream(filename);
+
+		byte[] buffer = new byte[1024];
+
+		MessageDigest complete = MessageDigest.getInstance("MD5");
+
+		int numRead;
+
+		do
+		{
+			numRead = fis.read(buffer);
+
+			if(numRead > 0)
+			{
+				complete.update(buffer, 0, numRead);
+			}
+		}
+
+		while(numRead != -1);
+
+		fis.close();
+
+		return complete.digest();
+	}
+
+	public static String getMD5Checksum(String filename) throws Exception
+	{
+		byte[] b = createChecksum(filename);
+
+		String result = "";
+
+		for(int i = 0; i < b.length; i++)
+		{
+			result += Integer.toString((b[i] & 0xff) + 0x100, 16).substring(1);
+		}
+		System.out.println(result);
+		return result;
 	}
 }
