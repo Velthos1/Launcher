@@ -16,6 +16,7 @@ import org.w3c.dom.NodeList;
 
 import com.dalthow.launcher.Window;
 import com.dalthow.launcher.framework.Game;
+import com.dalthow.launcher.framework.Modifications;
 
 public class XML
 {
@@ -184,8 +185,6 @@ public class XML
 								{
 									downloadLink = getUpdates().get(z).getUpdateLink();
 								}
-								
-								
 							}
 						}
 						Window.games.add(new Game(gameName, mainClass, null, downloadLink, new ImageIcon(new URL(imageURL)), changelog, false));
@@ -196,6 +195,36 @@ public class XML
 
 				}
 			}
+		}
+	}
+	
+	public static void setGameMods()
+	{
+		NodeList launcher = doc.getElementsByTagName("mod");
+		for(int i = 0; i < launcher.getLength(); i++)
+		{
+			Node node = launcher.item(i);
+			
+			String name = null;
+			String target = null;
+			String button = null;
+			
+			for(int j = 0; j < node.getAttributes().getLength(); j++)
+			{
+				if(node.getAttributes().item(j).getNodeName().equals("target"))
+				{
+					target = node.getAttributes().item(j).getNodeValue();
+				}
+				
+				if(node.getAttributes().item(j).getNodeName().equals("button"))
+				{
+					button = node.getAttributes().item(j).getNodeValue();
+				}
+			}
+
+			name = node.getChildNodes().item(0).getNodeValue();
+			
+			Window.mods.add(new Modifications(name, target, button));
 		}
 	}
 }

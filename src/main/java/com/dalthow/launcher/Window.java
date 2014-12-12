@@ -32,7 +32,6 @@ import java.util.Map;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -57,6 +56,7 @@ import org.springframework.stereotype.Component;
 import com.dalthow.launcher.framework.Game;
 import com.dalthow.launcher.framework.GameListRenderer;
 import com.dalthow.launcher.framework.JTextAreaOutputStream;
+import com.dalthow.launcher.framework.Modifications;
 import com.dalthow.launcher.framework.Profile;
 import com.dalthow.launcher.utils.Download;
 import com.dalthow.launcher.utils.Encrypter;
@@ -68,6 +68,7 @@ public class Window extends JFrame
 {
 	private static final long serialVersionUID = 8768561047038086348L;
 
+	public static LinkedList<Modifications> mods = new LinkedList<Modifications>();
 	public static LinkedList<Game> games = new LinkedList<Game>();
 	public static Map<String, ImageIcon> imageMap;
 
@@ -84,7 +85,6 @@ public class Window extends JFrame
 	private JPanel gamesPanel;
 	private JScrollPane changeLogScrollPane;
 	public static JList<?> gameList;
-	private JPanel loginPanel;
 	private JPanel consolePanel;
 	private JScrollPane gameConsoleScroll;
 	private JScrollPane launcherConsoleScroll;
@@ -98,6 +98,7 @@ public class Window extends JFrame
 	private JMenuItem uninstall;
 	private JPopupMenu gameRightClick;
 	private JEditorPane newsFeed;
+	private JPanel modifications;
 	public static JTextArea launcherConsoleTextArea;
 	private JSplitPane consoleSplit;
 	private JSplitPane gameSplit;
@@ -122,6 +123,7 @@ public class Window extends JFrame
 		{
 			nameList[i] = games.get(i).getName();
 		}
+
 	}
 
 	public void updatePlayButton()
@@ -216,6 +218,8 @@ public class Window extends JFrame
 			{
 				XML.setUpdates.join();
 			}
+
+			XML.setGameMods();
 		}
 		catch(InterruptedException e)
 		{
@@ -292,6 +296,7 @@ public class Window extends JFrame
 
 	private void initComponents()
 	{
+		modifications = new JPanel();
 		newsFeed = new JEditorPane();
 		progress = new JProgressBar();
 		tabbedPane = new JTabbedPane();
@@ -299,7 +304,7 @@ public class Window extends JFrame
 		gamesPanel = new JPanel();
 		changeLogScrollPane = new JScrollPane();
 		gameList = new JList<Object>(nameList);
-		loginPanel = new JPanel();
+
 		consolePanel = new JPanel();
 		gameConsoleScroll = new JScrollPane();
 		launcherConsoleScroll = new JScrollPane();
@@ -325,7 +330,6 @@ public class Window extends JFrame
 		addProfileButton = new JButton();
 		removeProfile = new JMenuItem("Delete");
 		rightClickProfile = new JPopupMenu();
-
 		profilesList.setModel(profileModel);
 		progress.setStringPainted(true);
 		profilesList.setPreferredSize(new Dimension(200, 0));
@@ -438,7 +442,22 @@ public class Window extends JFrame
 
 				updateNewsFeed();
 
+				modifications.setLayout(new GridBagLayout());
+
+				for(int i = 0; i < mods.size(); i++)
+				{
+					JLabel label1 = new JLabel();
+					label1.setText(mods.get(i).getName() + ":");
+					modifications.add(label1, new GridBagConstraints(0, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 10, 5), 0, 0));
+
+					//---- button1 ----
+					JButton button1 = new JButton();
+					button1.setText(mods.get(i).getButton());
+					modifications.add(button1, new GridBagConstraints(1, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 10, 0), 0, 0));
+				}
+
 				gameInfo.addTab("Changelog", wrapper);
+				gameInfo.addTab("Modifications", modifications);
 
 				wrapper.add(gameControlWrapper, BorderLayout.SOUTH);
 
