@@ -6,17 +6,19 @@ public class Update {
 	private String version;
 	private String branch;
 	private String updateLink;
-	private String md5;
+	private String zipMd5;
+	private String jarMd5;
 	private String game;
 	
-	public Update(String game, String version, String branch, String updateLink, String md5, boolean latest, boolean resetRequired){
+	public Update(String game, String version, String branch, String updateLink, String zipMd5, String jarMd5, boolean latest, boolean resetRequired){
 		this.game=game;
 		this.version=version;
 		this.branch=branch;
 		this.updateLink=updateLink;
-		this.md5=md5;
+		this.zipMd5=zipMd5;
 		this.latest=latest;
 		this.resetRequired=resetRequired;
+		this.setJarMd5(jarMd5);
 	}
 	
 	public Update(){
@@ -54,13 +56,23 @@ public class Update {
 		this.updateLink = updateLink;
 	}
 	public void setMD5(String md5){
-		this.md5=md5;
+		this.zipMd5=md5;
 	}
 	public String getMD5(){
-		return md5;
+		return zipMd5;
 	}
 	public String getGameName(){
 		return game;
+	}
+
+	public String getJarMd5()
+	{
+		return jarMd5;
+	}
+
+	public void setJarMd5(String jarMd5)
+	{
+		this.jarMd5 = jarMd5;
 	}
 	
 }
