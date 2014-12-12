@@ -1,3 +1,4 @@
+
 package com.dalthow.launcher;
 
 import java.awt.BorderLayout;
@@ -119,7 +120,7 @@ public class Window extends JFrame
 
 	private void addGamesToList()
 	{
-		for (int i = 0; i < games.size(); i++)
+		for(int i = 0; i < games.size(); i++)
 		{
 			nameList[i] = games.get(i).getName();
 		}
@@ -128,9 +129,9 @@ public class Window extends JFrame
 
 	public void updatePlayButton()
 	{
-		if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
+		if(GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
 		{
-			if (games.get(gameList.getSelectedIndex()).isUpdateAvailable())
+			if(games.get(gameList.getSelectedIndex()).isUpdateAvailable())
 			{
 				playButton.setText("Update");
 				versionLabel.setText("Ready to update to version: " + XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
@@ -150,9 +151,9 @@ public class Window extends JFrame
 			playButton.setText("Download");
 			uninstall.setEnabled(false);
 
-			for (int i = 0; i < XML.getUpdates().size(); i++)
+			for(int i = 0; i < XML.getUpdates().size(); i++)
 			{
-				if (XML.getUpdates().get(i).isLatest())
+				if(XML.getUpdates().get(i).isLatest())
 				{
 					versionLabel.setText("Ready to download: " + XML.getUpdates().get(i).getVersion());
 				}
@@ -165,7 +166,8 @@ public class Window extends JFrame
 		try
 		{
 			newsFeed.setPage(games.get(gameList.getSelectedIndex()).getChangeLog());
-		} catch (IOException e1)
+		}
+		catch(IOException e1)
 		{
 			e1.printStackTrace();
 		}
@@ -176,11 +178,12 @@ public class Window extends JFrame
 		Map<String, ImageIcon> map = new HashMap<>();
 		try
 		{
-			for (int i = 0; i < games.size(); i++)
+			for(int i = 0; i < games.size(); i++)
 			{
 				map.put(games.get(i).getName(), games.get(i).getImage());
 			}
-		} catch (Exception ex)
+		}
+		catch(Exception ex)
 		{
 			ex.printStackTrace();
 		}
@@ -198,13 +201,13 @@ public class Window extends JFrame
 		setIconImage(icon);
 
 		File FbaseDIR = new File(baseDIR);
-		if (!FbaseDIR.exists())
+		if(!FbaseDIR.exists())
 		{
 			FbaseDIR.mkdirs();
 		}
 
 		File FlauncherDIR = new File(launcherDIR);
-		if (!FlauncherDIR.exists())
+		if(!FlauncherDIR.exists())
 		{
 			FlauncherDIR.mkdir();
 		}
@@ -212,11 +215,12 @@ public class Window extends JFrame
 		try
 		{
 			XML.setUpdatesBETA();
-			synchronized (XML.setUpdates)
+			synchronized(XML.setUpdates)
 			{
 				XML.setUpdates.join();
 			}
-		} catch (InterruptedException e)
+		}
+		catch(InterruptedException e)
 		{
 			e.printStackTrace();
 		}
@@ -232,7 +236,7 @@ public class Window extends JFrame
 		getLogin();
 		addGamesToList();
 
-		if (profiles.isEmpty() == false)
+		if(profiles.isEmpty() == false)
 		{
 			this.profilesList.setSelectedIndex(0);
 			this.selectedProfile = profiles.get(profilesList.getSelectedIndex());
@@ -247,7 +251,7 @@ public class Window extends JFrame
 		rightClickProfile.add(removeProfile);
 		profilesList.setComponentPopupMenu(rightClickProfile);
 
-		for (int i = 0; i < profiles.size(); i++)
+		for(int i = 0; i < profiles.size(); i++)
 		{
 			this.profileModel.addElement(profiles.get(i).getUsername());
 		}
@@ -257,7 +261,7 @@ public class Window extends JFrame
 	{
 		File file = new File(launcherDIR + "profiles.txt");
 
-		if (!file.exists())
+		if(!file.exists())
 		{
 			file.createNewFile();
 		}
@@ -272,13 +276,13 @@ public class Window extends JFrame
 	{
 		File file = new File(launcherDIR + "/profiles.txt");
 
-		if (file.exists())
+		if(file.exists())
 		{
 			BufferedReader reader = new BufferedReader(new FileReader(file));
 			String line;
-			while ((line = reader.readLine()) != null)
+			while((line = reader.readLine()) != null)
 			{
-				if (!line.startsWith("/") && !line.isEmpty())
+				if(!line.startsWith("/") && !line.isEmpty())
 				{
 					profiles.add(new Profile(line.split(":")[0], line.split(":")[1]));
 				}
@@ -410,13 +414,13 @@ public class Window extends JFrame
 					((GridBagLayout) gameControl.getLayout()).rowWeights = new double[]
 					{ 0.0, 1.0E-4 };
 
-					// ---- playButton ----
+					//---- playButton ----
 					playButton.setMinimumSize(new Dimension(150, 150));
 					playButton.setMaximumSize(new Dimension(200, 200));
 					playButton.setPreferredSize(new Dimension(150, 40));
 					gameControl.add(playButton, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 5), 0, 0));
 
-					// ---- versionLabel ----
+					//---- versionLabel ----
 					gameControl.add(versionLabel, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.SOUTH, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 
 					this.updatePlayButton();
@@ -471,7 +475,8 @@ public class Window extends JFrame
 					{
 						removeProfile();
 
-					} catch (IOException e1)
+					}
+					catch(IOException e1)
 					{
 						e1.printStackTrace();
 					}
@@ -493,13 +498,13 @@ public class Window extends JFrame
 							try
 							{
 
-								if (gameList.getSelectedValue().equals(games.get(gameList.getSelectedIndex()).getName()))
+								if(gameList.getSelectedValue().equals(games.get(gameList.getSelectedIndex()).getName()))
 								{
 									String output = games.get(gameList.getSelectedIndex()).getName().substring(0, 1).toUpperCase() + games.get(gameList.getSelectedIndex()).getName().substring(1);
 
-									if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/") && !games.get(gameList.getSelectedIndex()).isUpdateAvailable())
+									if(GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/") && !games.get(gameList.getSelectedIndex()).isUpdateAvailable())
 									{
-										if (!profiles.isEmpty())
+										if(!profiles.isEmpty())
 										{
 											GameUtils.launchGame(output, games.get(gameList.getSelectedIndex()).getMainClass(), selectedProfile.getUsername(), selectedProfile.getEncryptedPassword());
 										}
@@ -514,11 +519,11 @@ public class Window extends JFrame
 									{
 										String downloadLink = null;
 
-										for (int j = 0; j < XML.getUpdates().size(); j++)
+										for(int j = 0; j < XML.getUpdates().size(); j++)
 										{
-											if (games.get(gameList.getSelectedIndex()).getName().equalsIgnoreCase(XML.getUpdates().get(j).getGameName()))
+											if(games.get(gameList.getSelectedIndex()).getName().equalsIgnoreCase(XML.getUpdates().get(j).getGameName()))
 											{
-												if (XML.getUpdates().get(j).isLatest())
+												if(XML.getUpdates().get(j).isLatest())
 												{
 													downloadLink = XML.getUpdates().get(j).getUpdateLink();
 												}
@@ -528,14 +533,15 @@ public class Window extends JFrame
 												}
 											}
 										}
-										Download.downloadGame(downloadLink, games.get(gameList.getSelectedIndex()).getName(), XML.getUpdates().get(gameList.getSelectedIndex()).getVersion());
+										Download.downloadGame(downloadLink, games.get(gameList.getSelectedIndex()).getName(), games.get(gameList.getSelectedIndex()).getVersion());
 										GameUtils.isUpdateAvalaible();
 										games.get(gameList.getSelectedIndex()).setUpdateAvailable(false);
 										updatePlayButton();
 									}
 								}
 
-							} catch (IOException | NoSuchAlgorithmException e)
+							}
+							catch(IOException | NoSuchAlgorithmException e)
 							{
 								e.printStackTrace();
 							}
@@ -550,7 +556,7 @@ public class Window extends JFrame
 				public void actionPerformed(ActionEvent e)
 				{
 					int dialogResult = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete " + games.get(gameList.getSelectedIndex()).getName() + "?", "Warning", JOptionPane.YES_NO_OPTION);
-					if (dialogResult == JOptionPane.YES_OPTION)
+					if(dialogResult == JOptionPane.YES_OPTION)
 					{
 						GameUtils.deleteDir(new File(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"));
 
@@ -568,20 +574,20 @@ public class Window extends JFrame
 				{
 					boolean existant = false;
 
-					if (!profiles.isEmpty())
+					if(!profiles.isEmpty())
 					{
-						for (int j = 0; j < profiles.size(); j++)
+						for(int j = 0; j < profiles.size(); j++)
 						{
-							if (profiles.get(j).getUsername().equalsIgnoreCase(textField1.getText()))
+							if(profiles.get(j).getUsername().equalsIgnoreCase(textField1.getText()))
 							{
 								existant = true;
 								break;
 							}
 						}
 					}
-					if (!existant)
+					if(!existant)
 					{
-						if (!textField1.getText().equalsIgnoreCase("") && !passwordField1.getText().equalsIgnoreCase(""))
+						if(!textField1.getText().equalsIgnoreCase("") && !passwordField1.getText().equalsIgnoreCase(""))
 						{
 							profiles.add(new Profile(textField1.getText(), Encrypter.encryptString(passwordField1.getText())));
 							profileModel.addElement(textField1.getText());
@@ -591,7 +597,7 @@ public class Window extends JFrame
 								addRecord();
 							}
 
-							catch (IOException e1)
+							catch(IOException e1)
 							{
 								// TODO Auto-generated catch block
 								e1.printStackTrace();
@@ -617,13 +623,14 @@ public class Window extends JFrame
 				public void actionPerformed(ActionEvent e)
 				{
 					Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-					if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE))
+					if(desktop != null && desktop.isSupported(Desktop.Action.BROWSE))
 					{
 						try
 						{
 							System.out.println("Opening Registration Website");
 							desktop.browse(new URL("http://dalthow.com/registration.php").toURI());
-						} catch (Exception e1)
+						}
+						catch(Exception e1)
 						{
 							e1.printStackTrace();
 						}
@@ -649,7 +656,7 @@ public class Window extends JFrame
 				@Override
 				public void mouseClicked(MouseEvent mouseEvent)
 				{
-					if (!profiles.isEmpty())
+					if(!profiles.isEmpty())
 					{
 						selectedProfile = profiles.get(profilesList.getSelectedIndex());
 					}
@@ -665,9 +672,9 @@ public class Window extends JFrame
 	{
 		modifications.removeAll();
 		modifications.updateUI();
-		for (int i = 0; i < mods.size(); i++)
+		for(int i = 0; i < mods.size(); i++)
 		{
-			if (mods.get(i).getGame().equalsIgnoreCase(games.get(gameList.getSelectedIndex()).getName()))
+			if(mods.get(i).getGame().equalsIgnoreCase(games.get(gameList.getSelectedIndex()).getName()))
 			{
 				final Modifications mod = mods.get(i);
 				JLabel label1 = new JLabel();
@@ -689,28 +696,18 @@ public class Window extends JFrame
 					{
 						Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
 
-						if (desktop != null && desktop.isSupported(Desktop.Action.OPEN))
+						if(desktop != null && desktop.isSupported(Desktop.Action.OPEN))
 						{
 							try
 							{
-								if (GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
+								if(GameUtils.isGameInstalled(baseDIR + games.get(gameList.getSelectedIndex()).getName() + "/"))
 								{
 									String appData = System.getenv("APPDATA");
 									File target = new File(appData + "/Dalthow/" + games.get(gameList.getSelectedIndex()).getName() + mod.getTarget());
-									File file = new File(target.getAbsolutePath());
-									if (!file.exists())
-									{
-										file.mkdirs();
-									}
-									desktop.open(file);
+									desktop.open(new File(target.getAbsolutePath()));
 								}
-								
-								else
-								{
-									JOptionPane.showMessageDialog(null, "In order to make modifications you must install the game first!", "Error", JOptionPane.ERROR_MESSAGE);
-									
-								}
-							} catch (Exception e1)
+							}
+							catch(Exception e1)
 							{
 								e1.printStackTrace();
 							}
@@ -727,12 +724,13 @@ public class Window extends JFrame
 					{
 						Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
 
-						if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE))
+						if(desktop != null && desktop.isSupported(Desktop.Action.BROWSE))
 						{
 							try
 							{
 								desktop.browse(new URL(mod.getHelp()).toURI());
-							} catch (IOException | URISyntaxException e1)
+							}
+							catch(IOException | URISyntaxException e1)
 							{
 								// TODO Auto-generated catch block
 								e1.printStackTrace();
@@ -748,7 +746,7 @@ public class Window extends JFrame
 
 	public void removeProfile() throws IOException
 	{
-		if (!profilesList.isSelectionEmpty())
+		if(!profilesList.isSelectionEmpty())
 		{
 			profiles.remove(profilesList.getSelectedIndex());
 			profileModel.remove(profilesList.getSelectedIndex());
@@ -766,7 +764,7 @@ public class Window extends JFrame
 
 			File inFile = new File(file);
 
-			if (!inFile.isFile())
+			if(!inFile.isFile())
 			{
 				System.out.println("Parameter is not an existing file");
 				return;
@@ -779,10 +777,10 @@ public class Window extends JFrame
 
 			String line = null;
 
-			while ((line = br.readLine()) != null)
+			while((line = br.readLine()) != null)
 			{
 
-				if (!line.trim().equals(lineToRemove))
+				if(!line.trim().equals(lineToRemove))
 				{
 
 					pw.println(line);
@@ -792,19 +790,21 @@ public class Window extends JFrame
 			pw.close();
 			br.close();
 
-			if (!inFile.delete())
+			if(!inFile.delete())
 			{
 				System.out.println("Could not delete file");
 				return;
 			}
 
-			if (!tempFile.renameTo(inFile))
+			if(!tempFile.renameTo(inFile))
 				System.out.println("Could not rename file");
 
-		} catch (FileNotFoundException ex)
+		}
+		catch(FileNotFoundException ex)
 		{
 			ex.printStackTrace();
-		} catch (IOException ex)
+		}
+		catch(IOException ex)
 		{
 			ex.printStackTrace();
 		}

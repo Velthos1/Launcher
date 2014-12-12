@@ -1,3 +1,4 @@
+
 package com.dalthow.launcher.utils;
 
 import java.io.File;
@@ -21,21 +22,13 @@ public class Unzip
 	{
 		try
 		{
+			System.out.println("Unzipping " + gameName);
 			String destinationname = Window.baseDIR + gameName + "/";
 			File file = new File(destinationname);
-			if (file.exists())
+			if(file.exists())
 			{
 				GameUtils.deleteDir(file);
-				file.mkdirs();
-			}
-			else
-			{
-				file.mkdirs();
-			}
-			File file1 = new File(destinationname + "/game_lib/");
-			if (!file1.exists())
-			{
-				file1.mkdirs();
+				file.mkdir();
 			}
 			byte[] buf = new byte[1024];
 			ZipInputStream zipinputstream = null;
@@ -43,19 +36,17 @@ public class Unzip
 			zipinputstream = new ZipInputStream(new FileInputStream(zipFile));
 
 			zipentry = zipinputstream.getNextEntry();
-			while (zipentry != null)
+			while(zipentry != null)
 			{
 				String entryName = destinationname + zipentry.getName();
-				System.out.println(entryName);
 				entryName = entryName.replace('/', File.separatorChar);
 				entryName = entryName.replace('\\', File.separatorChar);
-				System.out.println("entryname " + entryName);
-				int n;
+
 				FileOutputStream fileoutputstream;
 				File newFile = new File(entryName);
-				if (zipentry.isDirectory())
+				if(zipentry.isDirectory())
 				{
-					if (!newFile.mkdirs())
+					if(!newFile.mkdirs())
 					{
 						break;
 					}
@@ -64,7 +55,6 @@ public class Unzip
 				}
 
 				fileoutputstream = new FileOutputStream(entryName);
-
 
 				int bytesRead = -1;
 				long totalBytesRead = 0;
@@ -86,16 +76,19 @@ public class Unzip
 				fileoutputstream.close();
 				zipinputstream.closeEntry();
 				zipentry = zipinputstream.getNextEntry();
+
 			}
+			System.out.println("Unzip Complete!");
 
 			zipinputstream.close();
-		} catch (Exception e)
+			Window.playButton.setEnabled(true);
+			Window.progress.setToolTipText("Done!");
+		}
+		catch(Exception e)
 		{
 			e.printStackTrace();
 		}
 
-		System.out.println("Unzip Complete!");
-		Window.playButton.setEnabled(true);
-		Window.progress.setToolTipText("Done!");
 	}
+
 }
