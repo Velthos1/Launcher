@@ -65,7 +65,8 @@ public class XML
 				boolean requireReset = false;
 				String link = null;
 				String changelog = null;
-				String md5 = null;
+				String zipMd5 = null;
+				String jarMd5 = null;
 
 				NodeList gameList = doc.getElementsByTagName("games");
 				for (int v = 0; v < gameList.getLength(); v++)
@@ -138,7 +139,8 @@ public class XML
 											requireReset = Boolean.parseBoolean(update.getAttribute("requireReset"));
 											link = null;
 											changelog = null;
-											md5 = null;
+											zipMd5 = null;
+											jarMd5 = null;
 
 											NodeList updatelist = x.getChildNodes();
 
@@ -159,15 +161,26 @@ public class XML
 														
 														if (nc.getNodeType() == Node.ELEMENT_NODE && nc.getNodeName().equals("md5"))
 														{
-															md5 = nc.getTextContent().trim();
+															for(int k = 0; k < nc.getChildNodes().getLength(); k++)
+															{
+																if(nc.getChildNodes().item(k).getNodeName().equalsIgnoreCase("zip"))
+																{
+																	zipMd5 = nc.getChildNodes().item(k).getTextContent().trim();
+																}
+																
+																else if(nc.getChildNodes().item(k).getNodeName().equalsIgnoreCase("jar"))
+																{
+																	jarMd5 = nc.getChildNodes().item(k).getTextContent().trim();
+																}
+															}
+															
+															System.out.println(zipMd5+ " : " + jarMd5);
 														}
-
 													}
-
 												}//
 											}
 											
-											updates.put(index, new Update(game, version, branch, link, md5, latest, requireReset));
+											updates.put(index, new Update(game, version, branch, link, zipMd5, latest, requireReset));
 											index++;
 										}
 

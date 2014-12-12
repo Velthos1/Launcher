@@ -43,7 +43,7 @@ public class Download
 			savedFile.delete();
 			savedFile.createNewFile();
 		}
-		FileOutputStream outputStream = new FileOutputStream(tempDirectory + util.getFileName());
+		FileOutputStream outputStream = new FileOutputStream(tempDirectory+"/" + util.getFileName());
 
 		byte[] buffer = new byte[4096];
 		int bytesRead = -1;
@@ -65,7 +65,7 @@ public class Download
 		{
 			if (getMD5Checksum(tempDirectory + util.getFileName()).matches(XML.getUpdates().get(Window.gameList.getSelectedIndex()).getMD5()))
 			{
-				Unzip.unpackGame(tempDirectory + util.getFileName(), gameName);
+				Unzip.unpackGame(tempDirectory +"/"+ util.getFileName(), gameName);
 			}
 
 			else

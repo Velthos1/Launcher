@@ -18,7 +18,7 @@ public class Unzip
 
 	private static final Logger logger = LogManager.getLogger(Unzip.class);
 
-	public static void unpackGame(final String zipFile, final String gameName)
+	public static void unpackGame(String zipFile, String gameName)
 	{
 		try
 		{
