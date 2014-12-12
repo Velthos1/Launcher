@@ -131,7 +131,6 @@ public class XML
 										
 										if (x.getNodeName() == "update")
 										{
-
 											Element update = (Element) x;
 											version = update.getAttribute("version");
 											branch = update.getAttribute("branch");

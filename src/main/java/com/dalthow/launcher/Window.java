@@ -647,6 +647,7 @@ public class Window extends JFrame
 					// updateVersion();
 					updatePlayButton();
 					updateNewsFeed();
+					updateMods();
 				}
 			});
 
@@ -669,6 +670,8 @@ public class Window extends JFrame
 
 	private void updateMods()
 	{
+		modifications.removeAll();
+		
 		for(int i = 0; i < mods.size(); i++)
 		{
 			final Modifications mod = mods.get(i);
@@ -684,7 +687,6 @@ public class Window extends JFrame
 			button2.setText("Help");
 			modifications.add(button2, new GridBagConstraints(2, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 10, 0), 0, 0));
 
-			
 			button1.addActionListener(new ActionListener()
 			{
 				@Override
