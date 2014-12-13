@@ -340,7 +340,7 @@ public class Window extends JFrame
 		System.setOut(new PrintStream(new JTextAreaOutputStream(this.launcherConsoleTextArea)));
 		{
 			setMinimumSize(new Dimension(690, 485));
-			setResizable(true);// TODO decide XD
+			setResizable(true);
 			Container LauncherContentPane = getContentPane();
 			LauncherContentPane.setLayout(new BorderLayout());
 			LauncherContentPane.add(progress, BorderLayout.SOUTH);
